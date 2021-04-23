@@ -1,0 +1,16 @@
+{
+  "name": "etherlime-project",
+  "version": "1.0.0",
+  "description": "This is the default package.json generated for your project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@openzeppelin/contracts": "^3.4.1",
+    "etherlime-lib": "^1.2.5",
+    "solc": "^0.7.5"
+  }
+}
