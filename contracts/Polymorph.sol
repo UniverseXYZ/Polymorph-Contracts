@@ -15,14 +15,14 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
     using SafeMath for uint256;
     using Counters for Counters.Counter;
 
-    PolymorphGeneGenerator.Gene private geneGenerator;
+    PolymorphGeneGenerator.Gene internal geneGenerator;
 
     address payable public kekDAO;
 
     event TokenMorphed(uint256 indexed tokenId, uint256 oldGene, uint256 newGene);
 
      // Optional mapping for token URIs
-    mapping (uint256 => uint256) private _genes;
+    mapping (uint256 => uint256) internal _genes;
 
     constructor(string memory name, string memory symbol, string memory baseURI, address payable _kekDAO) ERC721PresetMinterPauserAutoId(name, symbol, baseURI) public {
         kekDAO = _kekDAO;
@@ -42,7 +42,6 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
 
     function mint() public override payable nonReentrant {
         _tokenIdTracker.increment();
-        // TODO Charge
         uint256 price = calcPolymorphPrice(_tokenIdTracker.current());
         kekDAO.transfer(price);
         _msgSender().transfer(msg.value.sub(price)); // Return excess
