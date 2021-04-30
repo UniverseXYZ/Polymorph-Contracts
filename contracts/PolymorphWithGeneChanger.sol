@@ -14,8 +14,15 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
     mapping(uint256 => uint256) internal _genomeChanges;
     uint256 public baseGenomeChangePrice;
 
+    event BaseGenomeChangePriceChanged(uint256 newGenomeChange);
+
     constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, uint256 _baseGenomeChangePrice) Polymorph(name, symbol, baseURI, _daoAddress) {
         baseGenomeChangePrice = _baseGenomeChangePrice;
+    }
+
+    function changeBaseGenomeChangePrice(uint256 newGenomeChangePrice)  public override virtual onlyDAO {
+        baseGenomeChangePrice = newGenomeChangePrice;
+        emit BaseGenomeChangePriceChanged(newGenomeChangePrice);
     }
 
     function morphGene(uint256 tokenId, uint256 genePosition) public payable virtual override nonReentrant {
