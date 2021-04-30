@@ -2,7 +2,6 @@
 pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "./PolymorphGeneGenerator.sol";
 
 
 interface IPolymorph is IERC721 {
@@ -11,6 +10,7 @@ interface IPolymorph is IERC721 {
     function mint() external payable;
     function lastTokenId() external view returns (uint256 tokenId);
     function priceFor(uint256 tokenNumber) external view returns (uint256 price);
+    function changeSlope(uint256 newSlope) external virtual;
 
     
 }

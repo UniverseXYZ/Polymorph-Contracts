@@ -4,7 +4,7 @@ const PolymorphWithGeneChanger = require('../build/PolymorphWithGeneChanger.json
 
 
 describe('PolymorphWithGeneChanger', () => {
-    let kekDAO = accounts[2];
+    let DAO = accounts[2];
     let aliceAccount = accounts[3];
     let bobsAccount = accounts[4];
     let defaultGenomeChangePrice = ethers.utils.parseEther("0.01");
@@ -12,7 +12,7 @@ describe('PolymorphWithGeneChanger', () => {
     let polymorphInstance;
 
     before(async () => {
-        const kekAddress = await kekDAO.signer.getAddress();
+        const kekAddress = await DAO.signer.getAddress();
         deployer = new etherlime.EtherlimeGanacheDeployer(aliceAccount.secretKey);
         polymorphInstance = await deployer.deploy(PolymorphWithGeneChanger, {}, "PolymorphWithGeneChanger", "POLY", "http://www.kekdao.com/", kekAddress, defaultGenomeChangePrice);
     });
@@ -22,7 +22,7 @@ describe('PolymorphWithGeneChanger', () => {
     })
 
     it('should mint nft with random gene', async () => {
-        const kekBalanceBefore = await kekDAO.signer.getBalance();
+        const kekBalanceBefore = await DAO.signer.getBalance();
 
         const cost1 = await polymorphInstance.priceFor(1);
         await polymorphInstance.mint({ value: cost1 })
@@ -30,7 +30,7 @@ describe('PolymorphWithGeneChanger', () => {
         const cost2 = await polymorphInstance.priceFor(2);
         await polymorphInstance.mint({ value: cost2.mul(2) });
 
-        const kekBalanceAfter = await kekDAO.signer.getBalance();
+        const kekBalanceAfter = await DAO.signer.getBalance();
 
         const geneA = await polymorphInstance.geneOf(1);
         const geneB = await polymorphInstance.geneOf(2);
@@ -89,7 +89,7 @@ describe('PolymorphWithGeneChanger', () => {
         // const res = div.add(insert).add(mod);
         // console.log(res.toString());
 
-        const kekBalanceBefore = await kekDAO.signer.getBalance();
+        const kekBalanceBefore = await DAO.signer.getBalance();
 
         const geneBefore = await polymorphInstance.geneOf(2);
 
@@ -98,7 +98,7 @@ describe('PolymorphWithGeneChanger', () => {
 
         await polymorphInstance.morphGene(2, 1, { value: price });
         const geneAfter = await polymorphInstance.geneOf(2);
-        const kekBalanceAfter = await kekDAO.signer.getBalance();
+        const kekBalanceAfter = await DAO.signer.getBalance();
         assert(!geneBefore.eq(geneAfter), "The gene did not change");
         assert(kekBalanceBefore.eq(kekBalanceAfter.sub(price)), "The price was not paid");
 
@@ -108,7 +108,7 @@ describe('PolymorphWithGeneChanger', () => {
 
         await polymorphInstance.morphGene(2, 0, { value: price });
         const geneAfter2 = await polymorphInstance.geneOf(2);
-        const kekBalanceAfter2 = await kekDAO.signer.getBalance();
+        const kekBalanceAfter2 = await DAO.signer.getBalance();
         assert(!geneAfter2.eq(geneAfter), "The gene did not change");
         assert(kekBalanceAfter.eq(kekBalanceAfter2.sub(price)), "The price was not paid");
 
@@ -128,6 +128,22 @@ describe('PolymorphWithGeneChanger', () => {
 
         price = await polymorphInstance.priceForGenomeChange(2);
         assert(price.eq(defaultGenomeChangePrice), "The price was not the default");
+    })
+
+    it('should change buy slope', async () => {
+
+        const oldSlope = 1500;
+        const newSlope = 2500;
+
+        const buySlopeBefore = await polymorphInstance.buySlope();
+        assert(buySlopeBefore.eq(oldSlope), "The buyslope was not 1500 in the beginning");
+
+        await polymorphInstance.from(DAO).changeSlope(newSlope);
+
+        const buySlopeAfter = await polymorphInstance.buySlope();
+        assert(buySlopeAfter.eq(newSlope), "The buyslope did not change");
+
+        await assert.revertWith(polymorphInstance.changeSlope(3500), "Not called from the dao");
     })
 
 });

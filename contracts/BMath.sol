@@ -5,7 +5,7 @@ import "./BNum.sol";
 
 contract BMath is BNum {
 
-    uint constant buySlope = 1500;
+    uint public buySlope = 1500;
 
 	/*******************************************************
     //                                                    //
@@ -17,7 +17,7 @@ contract BMath is BNum {
 	function calcPolymorphPrice(
         uint x
     )
-        internal pure
+        internal view
         returns (uint price)
     {
 

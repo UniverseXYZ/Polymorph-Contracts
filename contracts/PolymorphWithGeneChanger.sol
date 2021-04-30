@@ -4,23 +4,24 @@ pragma solidity ^0.7.0;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./PolymorphGeneGenerator.sol";
 import "./Polymorph.sol";
+import "./IPolymorphWithGeneChanger.sol";
 
 
-contract PolymorphWithGeneChanger is Polymorph {
+contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
     using SafeMath for uint256;
 
     mapping(uint256 => uint256) internal _genomeChanges;
     uint256 public baseGenomeChangePrice;
 
-    constructor(string memory name, string memory symbol, string memory baseURI, address payable _kekDAO, uint256 _baseGenomeChangePrice) Polymorph(name, symbol, baseURI, _kekDAO) {
+    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, uint256 _baseGenomeChangePrice) Polymorph(name, symbol, baseURI, _daoAddress) {
         baseGenomeChangePrice = _baseGenomeChangePrice;
     }
 
-    function morphGene(uint256 tokenId, uint256 genePosition) public payable virtual nonReentrant {
+    function morphGene(uint256 tokenId, uint256 genePosition) public payable virtual override nonReentrant {
         _beforeGenomeChange(tokenId);
         uint256 price = priceForGenomeChange(tokenId);
-        kekDAO.transfer(price);
+        daoAddress.transfer(price);
         _msgSender().transfer(msg.value.sub(price)); // Return excess
         uint256 oldGene = _genes[tokenId];
         uint256 newTrait = geneGenerator.random()%100;
@@ -41,10 +42,10 @@ contract PolymorphWithGeneChanger is Polymorph {
         return newGene;
     }
 
-    function randomizeGenome(uint256 tokenId) public payable virtual nonReentrant {
+    function randomizeGenome(uint256 tokenId) public payable override virtual nonReentrant {
         _beforeGenomeChange(tokenId);
         uint256 price = priceForGenomeChange(tokenId);
-        kekDAO.transfer(price);
+        daoAddress.transfer(price);
         _msgSender().transfer(msg.value.sub(price)); // Return excess
         uint256 oldGene = _genes[tokenId];
         _genes[tokenId] = geneGenerator.random();
@@ -52,7 +53,7 @@ contract PolymorphWithGeneChanger is Polymorph {
         emit TokenMorphed(tokenId, oldGene, _genes[tokenId]);
     }
 
-    function priceForGenomeChange(uint256 tokenId) public virtual view returns(uint256 price) {
+    function priceForGenomeChange(uint256 tokenId) public override virtual view returns(uint256 price) {
         uint256 pastChanges = _genomeChanges[tokenId];
         price = baseGenomeChangePrice;
         
