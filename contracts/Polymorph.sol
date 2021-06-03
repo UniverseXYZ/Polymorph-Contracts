@@ -18,7 +18,7 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
     PolymorphGeneGenerator.Gene internal geneGenerator;
 
     address payable public daoAddress;
-    address payable public marketplaceAddress;
+    address public marketplaceAddress;
     uint tokensMintedInitiallyCount = 5;
 
     event TokenMorphed(uint256 indexed tokenId, uint256 oldGene, uint256 newGene);
@@ -28,7 +28,7 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
      // Optional mapping for token URIs
     mapping (uint256 => uint256) internal _genes;
 
-    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, address payable _marketplaceAddress) ERC721PresetMinterPauserAutoId(name, symbol, baseURI) public {
+    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, address _marketplaceAddress) ERC721PresetMinterPauserAutoId(name, symbol, baseURI) public {
         daoAddress = _daoAddress;
         geneGenerator.random();
         marketplaceAddress = _marketplaceAddress;
@@ -85,7 +85,7 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
         emit SlopeChanged(newSlope);
     }
 
-    function setMarketplaceAddress(address payable _marketplaceAddress) internal onlyDAO {
+    function setMarketplaceAddress(address _marketplaceAddress) internal onlyDAO {
         marketplaceAddress = _marketplaceAddress;
     }
 
