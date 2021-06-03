@@ -3,5 +3,3 @@ build
 .etherlime-store
 coverage
 flat
-.env
-.vscode
