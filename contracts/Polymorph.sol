@@ -33,8 +33,13 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
         geneGenerator.random();
         marketplaceAddress = _marketplaceAddress;
 
-        for (uint i=0; i<tokensMintedInitiallyCount; i++) {
-            mint();
+        _preMint(tokensMintedInitiallyCount);
+    }
+
+    function _preMint(uint256 amountToMint) internal { 
+        for (uint i = 0; i < amountToMint; i++) {
+            _tokenIdTracker.increment();
+            _mint(_msgSender(), _tokenIdTracker.current()); 
         }
     }
 
