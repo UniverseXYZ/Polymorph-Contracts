@@ -89,10 +89,6 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
         marketplaceAddress = _marketplaceAddress;
     }
 
-    function greet() public pure returns (string memory) {
-        return 'yes';
-    }
-
     receive() external payable {
         mint();
     }
