@@ -32,7 +32,7 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
         daoAddress = _daoAddress;
         geneGenerator.random();
 
-        setWhitelistAddresses(_whitelistAddresses);
+        _setWhitelistAddresses(_whitelistAddresses);
         _preMint(tokensMintedInitiallyCount);
     }
 
@@ -43,7 +43,7 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
         }
     }
 
-    function setWhitelistAddresses(address[] memory _whitelistAddresses) public onlyDAO { 
+    function _setWhitelistAddresses(address[] memory _whitelistAddresses) internal onlyDAO { 
         for (uint i = 0; i < _whitelistAddresses.length; i++) {
             whitelistAddresses[_whitelistAddresses[i]] = true;
         }
@@ -94,6 +94,11 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
         require(newSlope > 0, "The new slope should be more than 0");
         buySlope = newSlope;
         emit SlopeChanged(newSlope);
+    }
+
+
+    function updateWhitelistAddress(address _whitelistAddress, bool privilege) public onlyDAO { 
+        whitelistAddresses[_whitelistAddress] = privilege;
     }
 
     receive() external payable {
