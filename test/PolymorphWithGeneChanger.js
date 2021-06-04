@@ -10,30 +10,73 @@ describe('PolymorphWithGeneChanger', () => {
     let defaultGenomeChangePrice = ethers.utils.parseEther("0.01");
     let deployer;
     let polymorphInstance;
+    const premitedTokensCount = 10;
 
     before(async () => {
         const kekAddress = await DAO.signer.getAddress();
+        const whitelistAddresses = [kekAddress];
         deployer = new etherlime.EtherlimeGanacheDeployer(aliceAccount.secretKey);
-        polymorphInstance = await deployer.deploy(PolymorphWithGeneChanger, {}, "PolymorphWithGeneChanger", "POLY", "http://www.kekdao.com/", kekAddress, defaultGenomeChangePrice);
+        polymorphInstance = await deployer.deploy(PolymorphWithGeneChanger, {}, "PolymorphWithGeneChanger", "POLY", "http://www.kekdao.com/", kekAddress, whitelistAddresses, premitedTokensCount, defaultGenomeChangePrice);
     });
 
     it('should be valid address', async () => {
         assert.isAddress(polymorphInstance.contractAddress, "The contract was not deployed");
     })
 
+    it(`should premint ${premitedTokensCount} tokens`, async () => {
+        const lastToken = await polymorphInstance.lastTokenId();
+        const ownerOfTheFirstToken = await polymorphInstance.ownerOf(1);
+        const aliceAddress = await aliceAccount.signer.getAddress();
+
+        assert(aliceAddress === ownerOfTheFirstToken, "The preminted tokens where not given to the owner");
+        assert(lastToken.eq(premitedTokensCount), "The preminted tokens count is not accurate");
+    })
+
+    it('should transfer token to the marketplace and keep the same genes', async () => {
+        const marketplaceAddress = await DAO.signer.getAddress();
+        const aliceAddress = await aliceAccount.signer.getAddress();
+
+        const geneBeforeTransactionToMarketplace = await polymorphInstance.geneOf(1);
+        await polymorphInstance.transferFrom(aliceAddress, marketplaceAddress, 1);
+        const geneAfterTransactionToMarketplace = await polymorphInstance.geneOf(1);
+        assert(geneBeforeTransactionToMarketplace.eq(geneAfterTransactionToMarketplace), "The genes morphed when sending transaction TO marketplace");
+
+
+        const ownerOfTheSentToken = await polymorphInstance.ownerOf(1);    
+        assert(ownerOfTheSentToken === marketplaceAddress, "The token was not transfered to the receiver.");
+
+    })
+
+    it('should transfer token from the marketplace and keep the same genes', async () => {
+        const marketplaceAddress = await DAO.signer.getAddress();
+        const aliceAddress = await aliceAccount.signer.getAddress();
+
+        await polymorphInstance.from(marketplaceAddress).setApprovalForAll(aliceAddress, true)
+
+        const ownerOfTheSentToken = await polymorphInstance.ownerOf(1);    
+        assert(marketplaceAddress === ownerOfTheSentToken, "The marketplace is not the owner of the token.");
+
+
+        const geneBeforeTransactionFromMarketplace = await polymorphInstance.geneOf(1);
+        await polymorphInstance.transferFrom(marketplaceAddress, aliceAddress, 1);
+        const geneAfterTransactionFromMarketplace = await polymorphInstance.geneOf(1);
+
+        assert(geneBeforeTransactionFromMarketplace.eq(geneAfterTransactionFromMarketplace), "The genes morphed when sending transaction FROM marketplace");
+    })
+
     it('should mint nft with random gene', async () => {
         const kekBalanceBefore = await DAO.signer.getBalance();
 
-        const cost1 = await polymorphInstance.priceFor(1);
+        const cost1 = await polymorphInstance.priceFor(premitedTokensCount + 1);
         await polymorphInstance.mint({ value: cost1 })
 
-        const cost2 = await polymorphInstance.priceFor(2);
-        await polymorphInstance.mint({ value: cost2.mul(2) });
+        const cost2 = await polymorphInstance.priceFor(premitedTokensCount + 2);
+        await polymorphInstance.mint({ value: cost2.mul(premitedTokensCount + 2) });
 
         const kekBalanceAfter = await DAO.signer.getBalance();
 
-        const geneA = await polymorphInstance.geneOf(1);
-        const geneB = await polymorphInstance.geneOf(2);
+        const geneA = await polymorphInstance.geneOf(premitedTokensCount + 1);
+        const geneB = await polymorphInstance.geneOf(premitedTokensCount + 2);
 
         assert(!geneA.eq(geneB), "The two genes ended up the same");
 
@@ -41,13 +84,12 @@ describe('PolymorphWithGeneChanger', () => {
     })
 
     it('should change the gene on transfer', async () => {
-
         const aliceAddress = await aliceAccount.signer.getAddress();
         const bobsAddress = await bobsAccount.signer.getAddress();
 
-        const geneBefore = await polymorphInstance.geneOf(1);
-        await polymorphInstance.transferFrom(aliceAddress, bobsAddress, 1);
-        const geneAfter = await polymorphInstance.geneOf(1);
+        const geneBefore = await polymorphInstance.geneOf(3);
+        await polymorphInstance.transferFrom(aliceAddress, bobsAddress, 3);
+        const geneAfter = await polymorphInstance.geneOf(3);
 
         assert(!geneBefore.eq(geneAfter), "The two genes ended up the same");
     })
@@ -145,5 +187,4 @@ describe('PolymorphWithGeneChanger', () => {
 
         await assert.revertWith(polymorphInstance.changeSlope(3500), "Not called from the dao");
     })
-
 });
