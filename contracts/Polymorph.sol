@@ -18,7 +18,7 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
     PolymorphGeneGenerator.Gene internal geneGenerator;
 
     address payable public daoAddress;
-    mapping(address => bool) public marketplaceAddresses;
+    mapping(address => bool) public whitelistAddresses;
     uint tokensMintedInitiallyCount = 5;
 
     event TokenMorphed(uint256 indexed tokenId, uint256 oldGene, uint256 newGene);
@@ -28,11 +28,11 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
      // Optional mapping for token URIs
     mapping (uint256 => uint256) internal _genes;
 
-    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, address payable _marketplaceAddress) ERC721PresetMinterPauserAutoId(name, symbol, baseURI) public {
+    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, address[] memory _whitelistAddresses) ERC721PresetMinterPauserAutoId(name, symbol, baseURI) public {
         daoAddress = _daoAddress;
         geneGenerator.random();
-        marketplaceAddresses[_marketplaceAddress] = true;
 
+        setWhitelistAddresses(_whitelistAddresses);
         _preMint(tokensMintedInitiallyCount);
     }
 
@@ -40,6 +40,12 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
         for (uint i = 0; i < amountToMint; i++) {
             _tokenIdTracker.increment();
             _mint(_msgSender(), _tokenIdTracker.current()); 
+        }
+    }
+
+    function setWhitelistAddresses(address[] memory _whitelistAddresses) public onlyDAO { 
+        for (uint i = 0; i < _whitelistAddresses.length; i++) {
+            whitelistAddresses[_whitelistAddresses[i]] = true;
         }
     }
 
@@ -53,7 +59,7 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override(ERC721PresetMinterPauserAutoId) {
-        if(marketplaceAddresses[from] == true || marketplaceAddresses[to] == true) {
+        if(whitelistAddresses[from] == true || whitelistAddresses[to] == true) {
             ERC721PresetMinterPauserAutoId._beforeTokenTransfer(from, to, tokenId);
             emit MarketplaceTransfer(tokenId, from, to);
         } else {
@@ -88,10 +94,6 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
         require(newSlope > 0, "The new slope should be more than 0");
         buySlope = newSlope;
         emit SlopeChanged(newSlope);
-    }
-
-    function setMarketplaceAddress(address _marketplaceAddress) internal onlyDAO {
-        marketplaceAddresses[_marketplaceAddress] = true;
     }
 
     receive() external payable {
