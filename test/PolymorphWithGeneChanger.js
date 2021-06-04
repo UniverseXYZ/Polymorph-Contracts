@@ -28,9 +28,6 @@ describe('PolymorphWithGeneChanger', () => {
         const ownerOfTheFirstToken = await polymorphInstance.ownerOf(1);
         const aliceAddress = await aliceAccount.signer.getAddress();
 
-        console.log('aliceAddress', aliceAddress);
-
-
         assert(aliceAddress === ownerOfTheFirstToken, "The preminted tokens where not given to the owner");
         assert(lastToken.eq(premitedTokensCount), "The preminted tokens count is not accurate");
     })
