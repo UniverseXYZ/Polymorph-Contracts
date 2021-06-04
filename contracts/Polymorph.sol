@@ -27,12 +27,12 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
      // Optional mapping for token URIs
     mapping (uint256 => uint256) internal _genes;
 
-    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, address[] memory _whitelistAddresses, uint tokensMintedInitiallyCount) ERC721PresetMinterPauserAutoId(name, symbol, baseURI) public {
+    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, address[] memory _whitelistAddresses, uint premintedTokensCount) ERC721PresetMinterPauserAutoId(name, symbol, baseURI) public {
         daoAddress = _daoAddress;
         geneGenerator.random();
 
         _setWhitelistAddresses(_whitelistAddresses);
-        _preMint(tokensMintedInitiallyCount);
+        _preMint(premintedTokensCount);
     }
 
     function _preMint(uint256 amountToMint) internal { 
