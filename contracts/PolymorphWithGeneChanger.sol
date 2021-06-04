@@ -16,7 +16,7 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
 
     event BaseGenomeChangePriceChanged(uint256 newGenomeChange);
 
-    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, address[] memory _whitelistAddresses, uint256 _baseGenomeChangePrice) Polymorph(name, symbol, baseURI, _daoAddress, _whitelistAddresses) {
+    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, address[] memory _whitelistAddresses, uint tokensMintedInitiallyCount, uint256 _baseGenomeChangePrice) Polymorph(name, symbol, baseURI, _daoAddress, _whitelistAddresses, tokensMintedInitiallyCount) {
         baseGenomeChangePrice = _baseGenomeChangePrice;
     }
 

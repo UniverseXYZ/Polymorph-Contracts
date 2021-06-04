@@ -13,8 +13,9 @@ describe('PolymorphWithGeneChanger', () => {
 
     before(async () => {
         const kekAddress = await DAO.signer.getAddress();
+        const whitelistAddresses = [kekAddress];
         deployer = new etherlime.EtherlimeGanacheDeployer(aliceAccount.secretKey);
-        polymorphInstance = await deployer.deploy(PolymorphWithGeneChanger, {}, "PolymorphWithGeneChanger", "POLY", "http://www.kekdao.com/", kekAddress, kekAddress, defaultGenomeChangePrice);
+        polymorphInstance = await deployer.deploy(PolymorphWithGeneChanger, {}, "PolymorphWithGeneChanger", "POLY", "http://www.kekdao.com/", kekAddress, whitelistAddresses, 5, defaultGenomeChangePrice);
     });
 
     it('should be valid address', async () => {
