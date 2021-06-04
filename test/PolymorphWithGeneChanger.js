@@ -54,7 +54,7 @@ describe('PolymorphWithGeneChanger', () => {
         const marketplaceAddress = await DAO.signer.getAddress();
         const aliceAddress = await aliceAccount.signer.getAddress();
 
-        await polymorphInstance.setApprovalForAll(marketplaceAddress, true)
+        await polymorphInstance.from(marketplaceAddress).setApprovalForAll(aliceAddress, true)
 
         const ownerOfTheSentToken = await polymorphInstance.ownerOf(1);    
         assert(marketplaceAddress === ownerOfTheSentToken, "The marketplace is not the owner of the token.");
@@ -90,9 +90,9 @@ describe('PolymorphWithGeneChanger', () => {
         const aliceAddress = await aliceAccount.signer.getAddress();
         const bobsAddress = await bobsAccount.signer.getAddress();
 
-        const geneBefore = await polymorphInstance.geneOf(1);
-        await polymorphInstance.transferFrom(aliceAddress, bobsAddress, 1);
-        const geneAfter = await polymorphInstance.geneOf(1);
+        const geneBefore = await polymorphInstance.geneOf(3);
+        await polymorphInstance.transferFrom(aliceAddress, bobsAddress, 3);
+        const geneAfter = await polymorphInstance.geneOf(3);
 
         assert(!geneBefore.eq(geneAfter), "The two genes ended up the same");
     })
