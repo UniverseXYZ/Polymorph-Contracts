@@ -18,7 +18,7 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
     PolymorphGeneGenerator.Gene internal geneGenerator;
 
     address payable public daoAddress;
-    address public marketplaceAddress;
+    mapping(address => bool) public marketplaceAddresses;
     uint tokensMintedInitiallyCount = 5;
 
     event TokenMorphed(uint256 indexed tokenId, uint256 oldGene, uint256 newGene);
@@ -28,10 +28,10 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
      // Optional mapping for token URIs
     mapping (uint256 => uint256) internal _genes;
 
-    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, address _marketplaceAddress) ERC721PresetMinterPauserAutoId(name, symbol, baseURI) public {
+    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, address payable _marketplaceAddress) ERC721PresetMinterPauserAutoId(name, symbol, baseURI) public {
         daoAddress = _daoAddress;
         geneGenerator.random();
-        marketplaceAddress = _marketplaceAddress;
+        marketplaceAddresses[_marketplaceAddress] = true;
 
         _preMint(tokensMintedInitiallyCount);
     }
@@ -53,7 +53,7 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override(ERC721PresetMinterPauserAutoId) {
-        if(from == marketplaceAddress || to == marketplaceAddress) {
+        if(marketplaceAddresses[from] == true || marketplaceAddresses[to] == true) {
             ERC721PresetMinterPauserAutoId._beforeTokenTransfer(from, to, tokenId);
             emit MarketplaceTransfer(tokenId, from, to);
         } else {
@@ -91,7 +91,7 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
     }
 
     function setMarketplaceAddress(address _marketplaceAddress) internal onlyDAO {
-        marketplaceAddress = _marketplaceAddress;
+        marketplaceAddresses[_marketplaceAddress] = true;
     }
 
     receive() external payable {

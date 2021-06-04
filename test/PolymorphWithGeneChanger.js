@@ -14,7 +14,7 @@ describe('PolymorphWithGeneChanger', () => {
     before(async () => {
         const kekAddress = await DAO.signer.getAddress();
         deployer = new etherlime.EtherlimeGanacheDeployer(aliceAccount.secretKey);
-        polymorphInstance = await deployer.deploy(PolymorphWithGeneChanger, {}, "PolymorphWithGeneChanger", "POLY", "http://www.kekdao.com/", kekAddress, defaultGenomeChangePrice);
+        polymorphInstance = await deployer.deploy(PolymorphWithGeneChanger, {}, "PolymorphWithGeneChanger", "POLY", "http://www.kekdao.com/", kekAddress, kekAddress, defaultGenomeChangePrice);
     });
 
     it('should be valid address', async () => {
@@ -145,5 +145,13 @@ describe('PolymorphWithGeneChanger', () => {
 
         await assert.revertWith(polymorphInstance.changeSlope(3500), "Not called from the dao");
     })
+
+    // it('should transfer token from marketplace and keep the same genes', async () => {
+
+    // })
+
+    // it('should premint a few tokens', async () => {
+
+    // })
 
 });
