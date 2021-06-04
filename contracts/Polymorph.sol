@@ -42,7 +42,7 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
         }
     }
 
-    function _setWhitelistAddresses(address[] memory _whitelistAddresses) internal onlyDAO { 
+    function _setWhitelistAddresses(address[] memory _whitelistAddresses) internal { 
         for (uint i = 0; i < _whitelistAddresses.length; i++) {
             whitelistAddresses[_whitelistAddresses[i]] = true;
         }
@@ -85,7 +85,7 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
         return calcPolymorphPrice(tokenNumber);
     }
 
-    function mint(address to) public override(ERC721PresetMinterPauserAutoId) pure {
+    function mint(address to) public override(ERC721PresetMinterPauserAutoId) {
         revert("Should not use this one");
     }
 
