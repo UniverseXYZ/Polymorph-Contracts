@@ -67,12 +67,6 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
     function priceForGenomeChange(uint256 tokenId) public override virtual view returns(uint256 price) {
         uint256 pastChanges = _genomeChanges[tokenId];
 
-        price = baseGenomeChangePrice;
-        
-        for(uint256 i = 0; i < pastChanges; i++) {
-            price = price.add(price);
-        }
-
         return baseGenomeChangePrice.mul(1 << pastChanges);
     }
 
