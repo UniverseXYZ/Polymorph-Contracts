@@ -16,7 +16,7 @@ describe('PolymorphWithGeneChanger', () => {
         const kekAddress = await DAO.signer.getAddress();
         const whitelistAddresses = [kekAddress];
         deployer = new etherlime.EtherlimeGanacheDeployer(aliceAccount.secretKey);
-        polymorphInstance = await deployer.deploy(PolymorphWithGeneChanger, {}, "PolymorphWithGeneChanger", "POLY", "http://www.kekdao.com/", kekAddress, whitelistAddresses, premitedTokensCount, defaultGenomeChangePrice);
+        polymorphInstance = await deployer.deploy(PolymorphWithGeneChanger, {}, "PolymorphWithGeneChanger", "POLY", "http://www.kekdao.com/", kekAddress, premitedTokensCount, defaultGenomeChangePrice);
     });
 
     it('should be valid address', async () => {
@@ -83,7 +83,7 @@ describe('PolymorphWithGeneChanger', () => {
         assert(kekBalanceAfter.eq(kekBalanceBefore.add(cost1.add(cost2))), "The dao did not receive correct amount");
     })
 
-    it('should change the gene on transfer', async () => {
+    it('should not change the gene on transfer', async () => {
         const aliceAddress = await aliceAccount.signer.getAddress();
         const bobsAddress = await bobsAccount.signer.getAddress();
 
@@ -91,7 +91,7 @@ describe('PolymorphWithGeneChanger', () => {
         await polymorphInstance.transferFrom(aliceAddress, bobsAddress, 3);
         const geneAfter = await polymorphInstance.geneOf(3);
 
-        assert(!geneBefore.eq(geneAfter), "The two genes ended up the same");
+        assert(geneBefore.eq(geneAfter), "The two genes ended up the same");
     })
 
     it.skip('total eth math calculator', async () => {
