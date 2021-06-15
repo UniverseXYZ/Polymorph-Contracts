@@ -62,10 +62,10 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
         uint256 tokenId = _tokenIdTracker.current();
         _genes[tokenId] = geneGenerator.random();
 
-        uint256 price = calcPolymorphPrice(_tokenIdTracker.current());
+        uint256 price = calcPolymorphPrice(tokenId);
         daoAddress.transfer(price);
         _msgSender().transfer(msg.value.sub(price)); // Return excess
-        _mint(_msgSender(), _tokenIdTracker.current());
+        _mint(_msgSender(), tokenId);
 
         emit TokenMinted(tokenId, _genes[tokenId]);
     }
