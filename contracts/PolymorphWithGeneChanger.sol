@@ -29,13 +29,8 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
         _beforeGenomeChange(tokenId);
         uint256 price = priceForGenomeChange(tokenId);
         
-        if(price > 0) {
-            (bool transferToDaoStatus, ) = daoAddress.call{value:price}("");
-            require(transferToDaoStatus, "Transfer failed.");
-
-            (bool returnExcessStatus, ) = _msgSender().call{value:msg.value.sub(price)}(""); // Return excess
-            require(returnExcessStatus, "Failed to return excess.");
-        }
+        (bool transferToDaoStatus, ) = daoAddress.call{value:price}("");
+        require(transferToDaoStatus, "Address: unable to send value, recipient may have reverted");
 
         uint256 oldGene = _genes[tokenId];
         uint256 newTrait = geneGenerator.random()%100;
@@ -60,13 +55,8 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
         _beforeGenomeChange(tokenId);
         uint256 price = priceForGenomeChange(tokenId);
 
-        if(price > 0) {
-            (bool transferToDaoStatus, ) = daoAddress.call{value:price}("");
-            require(transferToDaoStatus, "Transfer failed.");
-
-            (bool returnExcessStatus, ) = _msgSender().call{value:msg.value.sub(price)}(""); // Return excess
-            require(returnExcessStatus, "Failed to return excess.");
-        }
+        (bool transferToDaoStatus, ) = daoAddress.call{value:price}("");
+        require(transferToDaoStatus, "Address: unable to send value, recipient may have reverted");
         
         uint256 oldGene = _genes[tokenId];
         _genes[tokenId] = geneGenerator.random();
@@ -76,12 +66,11 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
 
     function priceForGenomeChange(uint256 tokenId) public override virtual view returns(uint256 price) {
         uint256 pastChanges = _genomeChanges[tokenId];
-        require(pastChanges < 255, 'pastChanges is too big and will cause overflow.');
 
         price = baseGenomeChangePrice;
         
         for(uint256 i = 0; i < pastChanges; i++) {
-            price.add(price);
+            price = price.add(price);
         }
 
         return baseGenomeChangePrice.mul(1 << pastChanges);

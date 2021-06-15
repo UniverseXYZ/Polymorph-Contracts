@@ -64,13 +64,8 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
 
         uint256 price = calcPolymorphPrice(tokenId);
         
-        if(price > 0) {
-            (bool transferToDaoStatus, ) = daoAddress.call{value:price}("");
-            require(transferToDaoStatus, "Transfer failed.");
-
-            (bool returnExcessStatus, ) = _msgSender().call{value:msg.value.sub(price)}(""); // Return excess
-            require(returnExcessStatus, "Failed to return excess.");
-        }
+        (bool transferToDaoStatus, ) = daoAddress.call{value:price}("");
+        require(transferToDaoStatus, "Address: unable to send value, recipient may have reverted");
         
         _mint(_msgSender(), tokenId);
 
