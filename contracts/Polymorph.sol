@@ -56,10 +56,6 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
         return _genes[tokenId];
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override(ERC721PresetMinterPauserAutoId) {
-        ERC721PresetMinterPauserAutoId._beforeTokenTransfer(from, to, tokenId);
-    }
-
     function mint() public override payable nonReentrant {
         _tokenIdTracker.increment();
 
