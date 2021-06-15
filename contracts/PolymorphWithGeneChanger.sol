@@ -28,8 +28,15 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
     function morphGene(uint256 tokenId, uint256 genePosition) public payable virtual override nonReentrant {
         _beforeGenomeChange(tokenId);
         uint256 price = priceForGenomeChange(tokenId);
-        daoAddress.transfer(price);
-        _msgSender().transfer(msg.value.sub(price)); // Return excess
+        
+        if(price > 0) {
+            (bool transferToDaoStatus, ) = daoAddress.call{value:price}("");
+            require(transferToDaoStatus, "Transfer failed.");
+
+            (bool returnExcessStatus, ) = _msgSender().call{value:msg.value.sub(price)}(""); // Return excess
+            require(returnExcessStatus, "Failed to return excess.");
+        }
+
         uint256 oldGene = _genes[tokenId];
         uint256 newTrait = geneGenerator.random()%100;
         _genes[tokenId] = replaceGene(_genes[tokenId], newTrait, genePosition);
@@ -52,8 +59,15 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
     function randomizeGenome(uint256 tokenId) public payable override virtual nonReentrant {
         _beforeGenomeChange(tokenId);
         uint256 price = priceForGenomeChange(tokenId);
-        daoAddress.transfer(price);
-        _msgSender().transfer(msg.value.sub(price)); // Return excess
+
+        if(price > 0) {
+            (bool transferToDaoStatus, ) = daoAddress.call{value:price}("");
+            require(transferToDaoStatus, "Transfer failed.");
+
+            (bool returnExcessStatus, ) = _msgSender().call{value:msg.value.sub(price)}(""); // Return excess
+            require(returnExcessStatus, "Failed to return excess.");
+        }
+        
         uint256 oldGene = _genes[tokenId];
         _genes[tokenId] = geneGenerator.random();
         _genomeChanges[tokenId] = 0;
@@ -62,13 +76,15 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
 
     function priceForGenomeChange(uint256 tokenId) public override virtual view returns(uint256 price) {
         uint256 pastChanges = _genomeChanges[tokenId];
+        require(pastChanges < 255, 'pastChanges is too big and will cause overflow.');
+
         price = baseGenomeChangePrice;
         
         for(uint256 i = 0; i < pastChanges; i++) {
-            price += price;
+            price.add(price);
         }
 
-        return price;
+        return baseGenomeChangePrice.mul(1 << pastChanges);
     }
 
     function _beforeGenomeChange(uint256 tokenId) internal virtual {

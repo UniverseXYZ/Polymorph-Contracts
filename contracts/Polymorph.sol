@@ -63,8 +63,15 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
         _genes[tokenId] = geneGenerator.random();
 
         uint256 price = calcPolymorphPrice(tokenId);
-        daoAddress.transfer(price);
-        _msgSender().transfer(msg.value.sub(price)); // Return excess
+        
+        if(price > 0) {
+            (bool transferToDaoStatus, ) = daoAddress.call{value:price}("");
+            require(transferToDaoStatus, "Transfer failed.");
+
+            (bool returnExcessStatus, ) = _msgSender().call{value:msg.value.sub(price)}(""); // Return excess
+            require(returnExcessStatus, "Failed to return excess.");
+        }
+        
         _mint(_msgSender(), tokenId);
 
         emit TokenMinted(tokenId, _genes[tokenId]);
