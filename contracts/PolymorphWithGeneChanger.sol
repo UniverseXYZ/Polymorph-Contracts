@@ -42,7 +42,7 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
         uint256 newTrait = geneGenerator.random()%100;
         _genes[tokenId] = replaceGene(_genes[tokenId], newTrait, genePosition);
         _genomeChanges[tokenId]++;
-        emit TokenMorphed(tokenId, oldGene, _genes[tokenId]);
+        emit TokenMorphed(tokenId, oldGene, _genes[tokenId], price, PolymorphEventType.MORPH);
     }
 
     function replaceGene(uint256 genome, uint256 replacement, uint256 genePosition) internal virtual pure returns(uint256 newGene) {
@@ -73,7 +73,7 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
         uint256 oldGene = _genes[tokenId];
         _genes[tokenId] = geneGenerator.random();
         _genomeChanges[tokenId] = 0;
-        emit TokenMorphed(tokenId, oldGene, _genes[tokenId]);
+        emit TokenMorphed(tokenId, oldGene, _genes[tokenId], price, PolymorphEventType.MORPH);
     }
 
     function priceForGenomeChange(uint256 tokenId) public override virtual view returns(uint256 price) {
