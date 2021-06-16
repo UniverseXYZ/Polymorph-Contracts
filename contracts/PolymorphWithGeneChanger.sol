@@ -32,6 +32,12 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
         (bool transferToDaoStatus, ) = daoAddress.call{value:price}("");
         require(transferToDaoStatus, "Address: unable to send value, recipient may have reverted");
 
+        uint256 excessAmount = msg.value.sub(price);
+        if (excessAmount > 0) {
+            (bool returnExcessStatus, ) = _msgSender().call{value: excessAmount}("");
+            require(returnExcessStatus, "Failed to return excess.");
+        }
+
         uint256 oldGene = _genes[tokenId];
         uint256 newTrait = geneGenerator.random()%100;
         _genes[tokenId] = replaceGene(_genes[tokenId], newTrait, genePosition);
@@ -57,6 +63,12 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
 
         (bool transferToDaoStatus, ) = daoAddress.call{value:price}("");
         require(transferToDaoStatus, "Address: unable to send value, recipient may have reverted");
+
+        uint256 excessAmount = msg.value.sub(price);
+        if (excessAmount > 0) {
+            (bool returnExcessStatus, ) = _msgSender().call{value: excessAmount}("");
+            require(returnExcessStatus, "Failed to return excess.");
+        }
         
         uint256 oldGene = _genes[tokenId];
         _genes[tokenId] = geneGenerator.random();
