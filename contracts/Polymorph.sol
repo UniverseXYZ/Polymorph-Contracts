@@ -18,11 +18,12 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
     PolymorphGeneGenerator.Gene internal geneGenerator;
 
     address payable public daoAddress;
-    mapping(address => bool) public whitelistAddresses;
 
-    event TokenMorphed(uint256 indexed tokenId, uint256 oldGene, uint256 newGene);
+    event TokenMorphed(uint256 indexed tokenId, uint256 oldGene, uint256 newGene, uint256 price, PolymorphEventType);
     event TokenMinted(uint256 indexed tokenId, uint256 newGene);
     event SlopeChanged(uint256 newSlope);
+
+    enum PolymorphEventType { MINT, MORPH, TRANSFER }
 
      // Optional mapping for token URIs
     mapping (uint256 => uint256) internal _genes;
@@ -41,12 +42,6 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
         }
     }
 
-    function _setWhitelistAddresses(address[] memory _whitelistAddresses) internal { 
-        for (uint i = 0; i < _whitelistAddresses.length; i++) {
-            whitelistAddresses[_whitelistAddresses[i]] = true;
-        }
-    }
-
     modifier onlyDAO() {
         require(msg.sender == daoAddress, "Not called from the dao");
         _;
@@ -54,6 +49,11 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
 
     function geneOf(uint256 tokenId) public view virtual override returns (uint256 gene) {
         return _genes[tokenId];
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override(ERC721PresetMinterPauserAutoId) {
+        ERC721PresetMinterPauserAutoId._beforeTokenTransfer(from, to, tokenId);
+        emit TokenMorphed(tokenId, _genes[tokenId], _genes[tokenId], 0, PolymorphEventType.TRANSFER);
     }
 
     function mint() public override payable nonReentrant {
@@ -76,6 +76,7 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
         _mint(_msgSender(), tokenId);
 
         emit TokenMinted(tokenId, _genes[tokenId]);
+        emit TokenMorphed(tokenId, 0, _genes[tokenId], price, PolymorphEventType.MINT);
     }
 
     function lastTokenId() public override view returns (uint256 tokenId) {
@@ -94,11 +95,6 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
         require(newSlope > 0, "The new slope should be more than 0");
         buySlope = newSlope;
         emit SlopeChanged(newSlope);
-    }
-
-
-    function updateWhitelistAddress(address _whitelistAddress, bool privilege) public onlyDAO { 
-        whitelistAddresses[_whitelistAddress] = privilege;
     }
 
     receive() external payable {
