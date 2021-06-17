@@ -10,73 +10,53 @@ describe('PolymorphWithGeneChanger', () => {
     let defaultGenomeChangePrice = ethers.utils.parseEther("0.01");
     let deployer;
     let polymorphInstance;
-    const premitedTokensCount = 10;
+    let premintedTokensCount = 5;
+    let polymorphPrice = ethers.utils.parseEther("0.0777");
+    let totalSupply = 30;
+    let randomizeGenomePrice = ethers.utils.parseEther("0.01");
+    let bulkBuyLimit = 20;
 
     before(async () => {
         const kekAddress = await DAO.signer.getAddress();
 
         deployer = new etherlime.EtherlimeGanacheDeployer(aliceAccount.secretKey);
-        polymorphInstance = await deployer.deploy(PolymorphWithGeneChanger, {}, "PolymorphWithGeneChanger", "POLY", "http://www.kekdao.com/", kekAddress, premitedTokensCount, defaultGenomeChangePrice);
+        polymorphInstance = await deployer.deploy(PolymorphWithGeneChanger, {}, "PolymorphWithGeneChanger", "POLY", "http://www.kekdao.com/", kekAddress, premintedTokensCount, defaultGenomeChangePrice, polymorphPrice, totalSupply, randomizeGenomePrice, bulkBuyLimit);
     });
 
     it('should be valid address', async () => {
         assert.isAddress(polymorphInstance.contractAddress, "The contract was not deployed");
     })
 
-    it(`should premint ${premitedTokensCount} tokens`, async () => {
+    it(`should premint ${premintedTokensCount} tokens`, async () => {
         const lastToken = await polymorphInstance.lastTokenId();
         const ownerOfTheFirstToken = await polymorphInstance.ownerOf(1);
         const aliceAddress = await aliceAccount.signer.getAddress();
 
         assert(aliceAddress === ownerOfTheFirstToken, "The preminted tokens where not given to the owner");
-        assert(lastToken.eq(premitedTokensCount), "The preminted tokens count is not accurate");
+        assert(lastToken.eq(premintedTokensCount), "The preminted tokens count is not accurate");
     })
 
-    it('should transfer token to the marketplace and keep the same genes', async () => {
-        const marketplaceAddress = await DAO.signer.getAddress();
-        const aliceAddress = await aliceAccount.signer.getAddress();
+    it(`should bulkBuy`, async () => {
+        const cost = await polymorphInstance.polymorphPrice();
 
-        const geneBeforeTransactionToMarketplace = await polymorphInstance.geneOf(1);
-        await polymorphInstance.transferFrom(aliceAddress, marketplaceAddress, 1);
-        const geneAfterTransactionToMarketplace = await polymorphInstance.geneOf(1);
-        assert(geneBeforeTransactionToMarketplace.eq(geneAfterTransactionToMarketplace), "The genes morphed when sending transaction TO marketplace");
+        await polymorphInstance.bulkBuy(20, { value: cost.mul(20) });
+        const lastTokenId = await polymorphInstance.lastTokenId();
 
-
-        const ownerOfTheSentToken = await polymorphInstance.ownerOf(1);    
-        assert(ownerOfTheSentToken === marketplaceAddress, "The token was not transfered to the receiver.");
-
-    })
-
-    it('should transfer token from the marketplace and keep the same genes', async () => {
-        const marketplaceAddress = await DAO.signer.getAddress();
-        const aliceAddress = await aliceAccount.signer.getAddress();
-
-        await polymorphInstance.from(marketplaceAddress).setApprovalForAll(aliceAddress, true)
-
-        const ownerOfTheSentToken = await polymorphInstance.ownerOf(1);    
-        assert(marketplaceAddress === ownerOfTheSentToken, "The marketplace is not the owner of the token.");
-
-
-        const geneBeforeTransactionFromMarketplace = await polymorphInstance.geneOf(1);
-        await polymorphInstance.transferFrom(marketplaceAddress, aliceAddress, 1);
-        const geneAfterTransactionFromMarketplace = await polymorphInstance.geneOf(1);
-
-        assert(geneBeforeTransactionFromMarketplace.eq(geneAfterTransactionFromMarketplace), "The genes morphed when sending transaction FROM marketplace");
-    })
+        assert(lastTokenId.eq(premintedTokensCount + 20));
+    }).timeout(15000);
 
     it('should mint nft with random gene', async () => {
         const kekBalanceBefore = await DAO.signer.getBalance();
 
-        const cost1 = await polymorphInstance.priceFor(premitedTokensCount + 1);
+        const cost1 = await polymorphInstance.polymorphPrice();
+        const cost2 = await polymorphInstance.polymorphPrice();
         await polymorphInstance.mint({ value: cost1 })
-
-        const cost2 = await polymorphInstance.priceFor(premitedTokensCount + 2);
-        await polymorphInstance.mint({ value: cost2.mul(premitedTokensCount + 2) });
+        await polymorphInstance.mint({ value: cost2 })
 
         const kekBalanceAfter = await DAO.signer.getBalance();
 
-        const geneA = await polymorphInstance.geneOf(premitedTokensCount + 1);
-        const geneB = await polymorphInstance.geneOf(premitedTokensCount + 2);
+        const geneA = await polymorphInstance.geneOf(premintedTokensCount + 1);
+        const geneB = await polymorphInstance.geneOf(premintedTokensCount + 2);
 
         assert(!geneA.eq(geneB), "The two genes ended up the same");
 
@@ -103,15 +83,14 @@ describe('PolymorphWithGeneChanger', () => {
         }
     })
 
-    it('should increase the price for minting', async () => {
-
-        for (let index = 1; index <= 1000; index += 100) {
-            const a = await polymorphInstance.priceFor(index);
-            const b = await polymorphInstance.priceFor(index + 100);
-            assert(b.gt(a), "Next morphs were not more expensive");
-
+    it(`should not mint more than totalSupply: ${totalSupply}`, async () => {
+        const cost = await polymorphInstance.polymorphPrice();
+        for (let i = 0; i < 3; i++ ) {
+            await polymorphInstance.mint({ value: cost });
         }
+        assert.revert(polymorphInstance.mint({ value: cost }));
     })
+
 
     it('should evolve gene', async () => {
 
@@ -172,19 +151,68 @@ describe('PolymorphWithGeneChanger', () => {
         assert(price.eq(defaultGenomeChangePrice), "The price was not the default");
     })
 
-    it('should change buy slope', async () => {
+    it('should change polymorph price', async () => {
 
-        const oldSlope = 1500;
-        const newSlope = 2500;
+        const oldPolymorphPrice = ethers.utils.parseEther("0.0777");
+        const newPolymorphPrice = ethers.utils.parseEther("0.0877");
 
-        const buySlopeBefore = await polymorphInstance.buySlope();
-        assert(buySlopeBefore.eq(oldSlope), "The buyslope was not 1500 in the beginning");
+        const polymorphPriceBefore = await polymorphInstance.polymorphPrice();
+        assert(polymorphPriceBefore.eq(oldPolymorphPrice), "The polymorph price was not 0.0777 in the beginning");
 
-        await polymorphInstance.from(DAO).changeSlope(newSlope);
+        await polymorphInstance.from(DAO).setPolymorphPrice(newPolymorphPrice);
 
-        const buySlopeAfter = await polymorphInstance.buySlope();
-        assert(buySlopeAfter.eq(newSlope), "The buyslope did not change");
+        const polymorphPriceAfter = await polymorphInstance.polymorphPrice();
+        assert(polymorphPriceAfter.eq(newPolymorphPrice), "The polymorph price did not change");
 
-        await assert.revertWith(polymorphInstance.changeSlope(3500), "Not called from the dao");
+        await assert.revertWith(polymorphInstance.setPolymorphPrice(newPolymorphPrice), "Not called from the dao");
     })
+
+    it('should change total supply', async () => {
+
+        const oldTotalSupply = 30;
+        const newTotalSupply = 10000;
+
+        const totalSupplyBefore = await polymorphInstance.totalSupply();
+        assert(totalSupplyBefore.eq(oldTotalSupply), "The total supply was not 10 in the beginning");
+
+        await polymorphInstance.from(DAO).setTotalSupply(newTotalSupply);
+
+        const totalSupplyAfter = await polymorphInstance.totalSupply();
+        assert(totalSupplyAfter.eq(newTotalSupply), "The total supply did not change");
+
+        await assert.revertWith(polymorphInstance.setTotalSupply(newTotalSupply), "Not called from the dao");
+    })
+
+    it('should change randomizeGenomePrice', async () => {
+
+        const oldRandomizeGenomePrice = ethers.utils.parseEther("0.01");
+        const newRandomizeGenomePrice = ethers.utils.parseEther("0.1");
+
+        const randomizeGenomePriceBefore = await polymorphInstance.randomizeGenomePrice();
+        assert(randomizeGenomePriceBefore.eq(oldRandomizeGenomePrice), "The randomize genome was not 10 in the beginning");
+
+        await polymorphInstance.from(DAO).changeRandomizeGenomePrice(newRandomizeGenomePrice);
+
+        const randomizeGenomePriceAfter = await polymorphInstance.randomizeGenomePrice();
+        assert(randomizeGenomePriceAfter.eq(newRandomizeGenomePrice), "The randomize genome price did not change");
+
+        await assert.revertWith(polymorphInstance.changeRandomizeGenomePrice(newRandomizeGenomePrice), "Not called from the dao");
+    })
+
+    it('should change bulk buy limit', async () => {
+
+        const oldBulkBuyLimit = 20;
+        const newBulkBuyLimit = 30;
+
+        const bulkBuyLimitBefore = await polymorphInstance.bulkBuyLimit();
+        assert(bulkBuyLimitBefore.eq(oldBulkBuyLimit), "The bulk buy limiu was not 20 in the beginning");
+
+        await polymorphInstance.from(DAO).setBulkBuyLimit(newBulkBuyLimit);
+
+        const bulkBuyLimitAfter = await polymorphInstance.bulkBuyLimit();
+        assert(bulkBuyLimitAfter.eq(newBulkBuyLimit), "The bulk buy limit did not change");
+
+        await assert.revertWith(polymorphInstance.setBulkBuyLimit(newBulkBuyLimit), "Not called from the dao");
+    })
+
 });

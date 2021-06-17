@@ -7,10 +7,9 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "./ERC721PresetMinterPauserAutoId.sol";
 import "./PolymorphGeneGenerator.sol";
 import "./IPolymorph.sol";
-import "./BMath.sol";
 
 
-contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, ReentrancyGuard {
+contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, ReentrancyGuard {
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
     using SafeMath for uint256;
     using Counters for Counters.Counter;
@@ -18,8 +17,11 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
     PolymorphGeneGenerator.Gene internal geneGenerator;
 
     address payable public daoAddress;
+    uint256 public polymorphPrice;
+    uint256 private _totalSupply;
+    uint256 public bulkBuyLimit;
 
-    event TokenMorphed(uint256 indexed tokenId, uint256 oldGene, uint256 newGene, uint256 price, PolymorphEventType);
+    event TokenMorphed(uint256 indexed tokenId, uint256 oldGene, uint256 newGene, uint256 price, Polymorph.PolymorphEventType eventType);
     event TokenMinted(uint256 indexed tokenId, uint256 newGene);
     event SlopeChanged(uint256 newSlope);
 
@@ -28,8 +30,11 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
      // Optional mapping for token URIs
     mapping (uint256 => uint256) internal _genes;
 
-    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, uint premintedTokensCount) ERC721PresetMinterPauserAutoId(name, symbol, baseURI) public {
+    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, uint premintedTokensCount, uint256 _polymorphPrice, uint256 totalSupply, uint256 _bulkBuyLimit) ERC721PresetMinterPauserAutoId(name, symbol, baseURI) public {
         daoAddress = _daoAddress;
+        polymorphPrice = _polymorphPrice;
+        _totalSupply = totalSupply;
+        bulkBuyLimit = _bulkBuyLimit;
         geneGenerator.random();
 
         _preMint(premintedTokensCount);
@@ -57,17 +62,17 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
     }
 
     function mint() public override payable nonReentrant {
+        require(_tokenIdTracker.current() < _totalSupply, "Total supply reached");
+
         _tokenIdTracker.increment();
 
         uint256 tokenId = _tokenIdTracker.current();
         _genes[tokenId] = geneGenerator.random();
-
-        uint256 price = calcPolymorphPrice(tokenId);
         
-        (bool transferToDaoStatus, ) = daoAddress.call{value:price}("");
+        (bool transferToDaoStatus, ) = daoAddress.call{value:polymorphPrice}("");
         require(transferToDaoStatus, "Address: unable to send value, recipient may have reverted");
 
-        uint256 excessAmount = msg.value.sub(price);
+        uint256 excessAmount = msg.value.sub(polymorphPrice);
         if (excessAmount > 0) {
             (bool returnExcessStatus, ) = _msgSender().call{value: excessAmount}("");
             require(returnExcessStatus, "Failed to return excess.");
@@ -76,25 +81,57 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, BMath, Reentra
         _mint(_msgSender(), tokenId);
 
         emit TokenMinted(tokenId, _genes[tokenId]);
-        emit TokenMorphed(tokenId, 0, _genes[tokenId], price, PolymorphEventType.MINT);
+        emit TokenMorphed(tokenId, 0, _genes[tokenId], polymorphPrice, PolymorphEventType.MINT);
+    }
+
+    function bulkBuy(uint256 amount) public override payable nonReentrant {
+        require(amount <= bulkBuyLimit, "Cannot bulk buy more than the preset limit");
+        require(_tokenIdTracker.current().add(amount) <= _totalSupply, "Total supply reached");
+        
+        (bool transferToDaoStatus, ) = daoAddress.call{value:polymorphPrice.mul(amount)}("");
+        require(transferToDaoStatus, "Address: unable to send value, recipient may have reverted");
+
+        uint256 excessAmount = msg.value.sub(polymorphPrice.mul(amount));
+        if (excessAmount > 0) {
+            (bool returnExcessStatus, ) = _msgSender().call{value: excessAmount}("");
+            require(returnExcessStatus, "Failed to return excess.");
+        }
+
+        for (uint256 i = 0; i < amount; i++) {
+            _tokenIdTracker.increment();
+            
+            uint256 tokenId = _tokenIdTracker.current();
+            _genes[tokenId] = geneGenerator.random();
+            _mint(_msgSender(), tokenId);
+            
+            emit TokenMinted(tokenId, _genes[tokenId]);
+            emit TokenMorphed(tokenId, 0, _genes[tokenId], polymorphPrice, PolymorphEventType.MINT); 
+        }
+        
     }
 
     function lastTokenId() public override view returns (uint256 tokenId) {
         return _tokenIdTracker.current();
     }
 
-    function priceFor(uint256 tokenNumber) public override view returns (uint256 price) {
-        return calcPolymorphPrice(tokenNumber);
-    }
-
     function mint(address to) public override(ERC721PresetMinterPauserAutoId) {
         revert("Should not use this one");
     }
 
-    function changeSlope(uint256 newSlope) public override virtual onlyDAO {
-        require(newSlope > 0, "The new slope should be more than 0");
-        buySlope = newSlope;
-        emit SlopeChanged(newSlope);
+    function setPolymorphPrice(uint256 newPolymorphPrice) public override virtual onlyDAO {
+        polymorphPrice = newPolymorphPrice;
+    }
+
+    function setTotalSupply(uint256 totalSupply) public override virtual onlyDAO {
+        _totalSupply = totalSupply;
+    }
+
+    function setBulkBuyLimit(uint256 _bulkBuyLimit) public override virtual onlyDAO {
+        bulkBuyLimit = _bulkBuyLimit;
+    }
+
+    function totalSupply() public override view returns (uint256) {
+        return _totalSupply;
     }
 
     receive() external payable {

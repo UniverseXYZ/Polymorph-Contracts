@@ -13,16 +13,24 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
 
     mapping(uint256 => uint256) internal _genomeChanges;
     uint256 public baseGenomeChangePrice;
+    uint256 public randomizeGenomePrice;
 
     event BaseGenomeChangePriceChanged(uint256 newGenomeChange);
+    event RandomizeGenomePriceChanged(uint256 newRandomizeGenomePriceChange);
 
-    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, uint premintedTokensCount, uint256 _baseGenomeChangePrice) Polymorph(name, symbol, baseURI, _daoAddress, premintedTokensCount) {
+    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, uint premintedTokensCount, uint256 _baseGenomeChangePrice, uint256 _polymorphPrice, uint256 totalSupply, uint256 _randomizeGenomePrice, uint256 _bulkBuyLimit) Polymorph(name, symbol, baseURI, _daoAddress, premintedTokensCount, _polymorphPrice, totalSupply, _bulkBuyLimit) {
         baseGenomeChangePrice = _baseGenomeChangePrice;
+        randomizeGenomePrice = _randomizeGenomePrice;
     }
 
     function changeBaseGenomeChangePrice(uint256 newGenomeChangePrice)  public override virtual onlyDAO {
         baseGenomeChangePrice = newGenomeChangePrice;
         emit BaseGenomeChangePriceChanged(newGenomeChangePrice);
+    }
+
+    function changeRandomizeGenomePrice(uint256 newRandomizeGenomePrice)  public override virtual onlyDAO {
+        randomizeGenomePrice = newRandomizeGenomePrice;
+        emit RandomizeGenomePriceChanged(newRandomizeGenomePrice);
     }
 
     function morphGene(uint256 tokenId, uint256 genePosition) public payable virtual override nonReentrant {
@@ -59,12 +67,11 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
 
     function randomizeGenome(uint256 tokenId) public payable override virtual nonReentrant {
         _beforeGenomeChange(tokenId);
-        uint256 price = priceForGenomeChange(tokenId);
 
-        (bool transferToDaoStatus, ) = daoAddress.call{value:price}("");
+        (bool transferToDaoStatus, ) = daoAddress.call{value:randomizeGenomePrice}("");
         require(transferToDaoStatus, "Address: unable to send value, recipient may have reverted");
 
-        uint256 excessAmount = msg.value.sub(price);
+        uint256 excessAmount = msg.value.sub(randomizeGenomePrice);
         if (excessAmount > 0) {
             (bool returnExcessStatus, ) = _msgSender().call{value: excessAmount}("");
             require(returnExcessStatus, "Failed to return excess.");
@@ -73,7 +80,7 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
         uint256 oldGene = _genes[tokenId];
         _genes[tokenId] = geneGenerator.random();
         _genomeChanges[tokenId] = 0;
-        emit TokenMorphed(tokenId, oldGene, _genes[tokenId], price, PolymorphEventType.MORPH);
+        emit TokenMorphed(tokenId, oldGene, _genes[tokenId], randomizeGenomePrice, PolymorphEventType.MORPH);
     }
 
     function priceForGenomeChange(uint256 tokenId) public override virtual view returns(uint256 price) {

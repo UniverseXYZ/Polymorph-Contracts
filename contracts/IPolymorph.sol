@@ -8,9 +8,10 @@ interface IPolymorph is IERC721 {
 
     function geneOf(uint256 tokenId) external view returns (uint256 gene);
     function mint() external payable;
+    function bulkBuy(uint256 amount) external payable;
     function lastTokenId() external view returns (uint256 tokenId);
-    function priceFor(uint256 tokenNumber) external view returns (uint256 price);
-    function changeSlope(uint256 newSlope) external virtual;
+    function setPolymorphPrice(uint256 newPolymorphPrice) external virtual;
+    function setTotalSupply(uint256 totalSupply) external virtual;
+    function setBulkBuyLimit(uint256 bulkBuyLimit) external virtual;
 
-    
 }
