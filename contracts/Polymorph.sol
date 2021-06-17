@@ -43,7 +43,9 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, ReentrancyGuar
     function _preMint(uint256 amountToMint) internal { 
         for (uint i = 0; i < amountToMint; i++) {
             _tokenIdTracker.increment();
-            _mint(_msgSender(), _tokenIdTracker.current()); 
+            uint256 tokenId = _tokenIdTracker.current();
+            _genes[tokenId] = geneGenerator.random();
+            _mint(_msgSender(), tokenId); 
         }
     }
 

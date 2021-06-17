@@ -34,6 +34,9 @@ describe('PolymorphWithGeneChanger', () => {
 
         assert(aliceAddress === ownerOfTheFirstToken, "The preminted tokens where not given to the owner");
         assert(lastToken.eq(premintedTokensCount), "The preminted tokens count is not accurate");
+
+        const geneOfLastToken = await polymorphInstance.geneOf(lastToken);
+        assert(geneOfLastToken != 0, "Gene hasn't been set");
     })
 
     it(`should bulkBuy`, async () => {
