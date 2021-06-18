@@ -130,21 +130,21 @@ describe('PolymorphWithGeneChanger', () => {
         price = await polymorphInstance.priceForGenomeChange(2);
         assert(price.eq(defaultGenomeChangePrice.mul(2)), "The price was not correct");
 
-        await polymorphInstance.morphGene(2, 0, { value: price });
+        await assert.revertWith(polymorphInstance.morphGene(2, 0, { value: price }));
         const geneAfter2 = await polymorphInstance.geneOf(2);
         const kekBalanceAfter2 = await DAO.signer.getBalance();
-        assert(!geneAfter2.eq(geneAfter), "The gene did not change");
-        assert(kekBalanceAfter.eq(kekBalanceAfter2.sub(price)), "The price was not paid");
+        assert(geneAfter2.eq(geneAfter), "The gene did change");
+        assert(kekBalanceAfter.eq(kekBalanceAfter2), "The price was paid");
 
         price = await polymorphInstance.priceForGenomeChange(2);
-        assert(price.eq(defaultGenomeChangePrice.mul(4)), "The price was not correct");
+        assert(price.eq(defaultGenomeChangePrice.mul(2)), "The price was not correct");
 
         await polymorphInstance.morphGene(2, 37, { value: price, gasLimit: 100000 });
         const geneAfter3 = await polymorphInstance.geneOf(2);
         assert(!geneAfter2.eq(geneAfter3), "The gene did not change");
 
         price = await polymorphInstance.priceForGenomeChange(2);
-        assert(price.eq(defaultGenomeChangePrice.mul(8)), "The price was not correct");
+        assert(price.eq(defaultGenomeChangePrice.mul(4)), "The price was not correct");
 
         await polymorphInstance.randomizeGenome(2, { value: price });
         const geneAfterReset = await polymorphInstance.geneOf(2);

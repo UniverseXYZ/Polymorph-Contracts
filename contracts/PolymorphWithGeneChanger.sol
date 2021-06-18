@@ -34,6 +34,7 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
     }
 
     function morphGene(uint256 tokenId, uint256 genePosition) public payable virtual override nonReentrant {
+        require(genePosition > 0, "Base character not morphable");
         _beforeGenomeChange(tokenId);
         uint256 price = priceForGenomeChange(tokenId);
         
