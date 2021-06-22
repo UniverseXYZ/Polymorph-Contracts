@@ -23,7 +23,9 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, ReentrancyGuar
 
     event TokenMorphed(uint256 indexed tokenId, uint256 oldGene, uint256 newGene, uint256 price, Polymorph.PolymorphEventType eventType);
     event TokenMinted(uint256 indexed tokenId, uint256 newGene);
-    event SlopeChanged(uint256 newSlope);
+    event PolymorphPriceChanged(uint256 newPolymorphPrice);
+    event TotalSupplyChanged(uint256 newTotalSupply);
+    event BulkBuyLimitChanged(uint256 newBulkBuyLimit);
 
     enum PolymorphEventType { MINT, MORPH, TRANSFER }
 
@@ -122,14 +124,20 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, ReentrancyGuar
 
     function setPolymorphPrice(uint256 newPolymorphPrice) public override virtual onlyDAO {
         polymorphPrice = newPolymorphPrice;
+
+        emit PolymorphPriceChanged(newPolymorphPrice);
     }
 
     function setTotalSupply(uint256 totalSupply) public override virtual onlyDAO {
         _totalSupply = totalSupply;
+
+        emit TotalSupplyChanged(totalSupply);
     }
 
     function setBulkBuyLimit(uint256 _bulkBuyLimit) public override virtual onlyDAO {
         bulkBuyLimit = _bulkBuyLimit;
+
+        emit BulkBuyLimitChanged(_bulkBuyLimit);
     }
 
     function totalSupply() public override view returns (uint256) {

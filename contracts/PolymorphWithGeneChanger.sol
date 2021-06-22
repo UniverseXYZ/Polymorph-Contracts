@@ -49,9 +49,9 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
 
         uint256 oldGene = _genes[tokenId];
         uint256 newTrait = geneGenerator.random()%100;
-        _genes[tokenId] = replaceGene(_genes[tokenId], newTrait, genePosition);
+        _genes[tokenId] = replaceGene(oldGene, newTrait, genePosition);
         _genomeChanges[tokenId]++;
-        emit TokenMorphed(tokenId, oldGene, _genes[tokenId], price, PolymorphEventType.MORPH);
+        emit TokenMorphed(tokenId, oldGene, oldGene, price, PolymorphEventType.MORPH);
     }
 
     function replaceGene(uint256 genome, uint256 replacement, uint256 genePosition) internal virtual pure returns(uint256 newGene) {
