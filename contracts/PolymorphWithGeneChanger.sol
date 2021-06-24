@@ -18,7 +18,7 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
     event BaseGenomeChangePriceChanged(uint256 newGenomeChange);
     event RandomizeGenomePriceChanged(uint256 newRandomizeGenomePriceChange);
 
-    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, uint premintedTokensCount, uint256 _baseGenomeChangePrice, uint256 _polymorphPrice, uint256 totalSupply, uint256 _randomizeGenomePrice, uint256 _bulkBuyLimit) Polymorph(name, symbol, baseURI, _daoAddress, premintedTokensCount, _polymorphPrice, totalSupply, _bulkBuyLimit) {
+    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, uint premintedTokensCount, uint256 _baseGenomeChangePrice, uint256 _polymorphPrice, uint256 totalSupply, uint256 _randomizeGenomePrice, uint256 _bulkBuyLimit, string memory _arweaveAssetsJSON) Polymorph(name, symbol, baseURI, _daoAddress, premintedTokensCount, _polymorphPrice, totalSupply, _bulkBuyLimit, _arweaveAssetsJSON) {
         baseGenomeChangePrice = _baseGenomeChangePrice;
         randomizeGenomePrice = _randomizeGenomePrice;
     }
