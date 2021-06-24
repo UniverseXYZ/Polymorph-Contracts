@@ -26,6 +26,7 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, ReentrancyGuar
     event PolymorphPriceChanged(uint256 newPolymorphPrice);
     event TotalSupplyChanged(uint256 newTotalSupply);
     event BulkBuyLimitChanged(uint256 newBulkBuyLimit);
+    event BaseURIChanged(string baseURI);
 
     enum PolymorphEventType { MINT, MORPH, TRANSFER }
 
@@ -138,6 +139,12 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, ReentrancyGuar
         bulkBuyLimit = _bulkBuyLimit;
 
         emit BulkBuyLimitChanged(_bulkBuyLimit);
+    }
+
+    function setBaseURI(string memory _baseURI) public override virtual onlyDAO { 
+        _setBaseURI(_baseURI);
+
+        emit BaseURIChanged(_baseURI);
     }
 
     function totalSupply() public override view returns (uint256) {
