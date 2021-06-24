@@ -20,6 +20,7 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, ReentrancyGuar
     uint256 public polymorphPrice;
     uint256 private _totalSupply;
     uint256 public bulkBuyLimit;
+    string public arweaveAssetsJSON;
 
     event TokenMorphed(uint256 indexed tokenId, uint256 oldGene, uint256 newGene, uint256 price, Polymorph.PolymorphEventType eventType);
     event TokenMinted(uint256 indexed tokenId, uint256 newGene);
@@ -27,17 +28,19 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, ReentrancyGuar
     event TotalSupplyChanged(uint256 newTotalSupply);
     event BulkBuyLimitChanged(uint256 newBulkBuyLimit);
     event BaseURIChanged(string baseURI);
-
+    event arweaveAssetsJSONChanged(string arweaveAssetsJSON);
+    
     enum PolymorphEventType { MINT, MORPH, TRANSFER }
 
      // Optional mapping for token URIs
     mapping (uint256 => uint256) internal _genes;
 
-    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, uint premintedTokensCount, uint256 _polymorphPrice, uint256 totalSupply, uint256 _bulkBuyLimit) ERC721PresetMinterPauserAutoId(name, symbol, baseURI) public {
+    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, uint premintedTokensCount, uint256 _polymorphPrice, uint256 totalSupply, uint256 _bulkBuyLimit, string memory _arweaveAssetsJSON) ERC721PresetMinterPauserAutoId(name, symbol, baseURI) public {
         daoAddress = _daoAddress;
         polymorphPrice = _polymorphPrice;
         _totalSupply = totalSupply;
         bulkBuyLimit = _bulkBuyLimit;
+        arweaveAssetsJSON = _arweaveAssetsJSON;
         geneGenerator.random();
 
         _preMint(premintedTokensCount);
@@ -145,6 +148,12 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, ReentrancyGuar
         _setBaseURI(_baseURI);
 
         emit BaseURIChanged(_baseURI);
+    }
+
+    function setArweaveAssetsJSON(string memory _arweaveAssetsJSON) public virtual onlyDAO {
+        arweaveAssetsJSON = _arweaveAssetsJSON;
+
+        emit arweaveAssetsJSONChanged(_arweaveAssetsJSON);
     }
 
     function totalSupply() public override view returns (uint256) {
