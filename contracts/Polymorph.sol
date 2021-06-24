@@ -141,7 +141,7 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, ReentrancyGuar
         emit BulkBuyLimitChanged(_bulkBuyLimit);
     }
 
-    function setBaseURI(string memory _baseURI) public override virtual onlyDAO { 
+    function setBaseURI(string memory _baseURI) public virtual onlyDAO { 
         _setBaseURI(_baseURI);
 
         emit BaseURIChanged(_baseURI);
