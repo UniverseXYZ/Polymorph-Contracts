@@ -204,6 +204,22 @@ describe('PolymorphWithGeneChanger', () => {
 
     it('should change bulk buy limit', async () => {
 
+        const oldBaseURI = "http://www.kekdao.com/";
+        const newBaseURI = "http://www.universe.xyz/";
+
+        const baseURIBefore = await polymorphInstance.baseURI();
+        assert(baseURIBefore === oldBaseURI, "The base URI was not http://www.kekdao.com/ in the beginning");
+
+        await polymorphInstance.from(DAO).setBaseURI("http://www.universe.xyz/");
+
+        const baseURIAfter = await polymorphInstance.baseURI();
+        assert(baseURIAfter === newBaseURI, "The baseURI did not change");
+
+        await assert.revertWith(polymorphInstance.setBaseURI(newBaseURI), "Not called from the dao");
+    })
+
+    it('should change baseURI', async () => {
+
         const oldBulkBuyLimit = 20;
         const newBulkBuyLimit = 30;
 
