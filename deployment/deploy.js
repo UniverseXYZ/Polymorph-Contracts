@@ -6,8 +6,36 @@ const PolymorphWithGeneChanger = require('../build/PolymorphWithGeneChanger.json
 const deploy = async (network, secret, etherscanApiKey) => {
 
 	const deployer = new etherlime.InfuraPrivateKeyDeployer(secret, network, process.env.API_KEY);
-	deployer.defaultOverrides = { gasLimit: 4700000, gasPrice: 3000000000, etherscanApiKey };
-	const result = await deployer.deployAndVerify("etherscan", PolymorphWithGeneChanger, {}, "Polymorph", "MORPH", "https://polymorphmetadata.uc.r.appspot.com/token/", "0xe42682eEa1DFC432C2fF5a779CD1D9a1e1c7f405", 0, ethers.utils.parseEther("0.01"), ethers.utils.parseEther("0.0777"), 10000, ethers.utils.parseEther("0.01"), 20, "https://arweave.net/Xhx9MHp-zmtlOwaM9nSz8DTqnpUSdEAzlpn_lwyjeMg");
+	const gasPrice = 32000000000
+	const gasLimit = 4700000
+
+	const tokenName = "Polymorph";
+	const tokenSymbol = "MORPH";
+	const metadataURI = "https://us-central1-polymorphmetadata.cloudfunctions.net/images-function?id="
+	const DAOAddress = "0xa8047C2a86D5A188B0e15C3C10E2bc144cB272C2"
+	const premint = 0
+	const geneChangePrice = ethers.utils.parseEther("0.01");
+	const polymorphPrice = ethers.utils.parseEther("0.0777");
+	const polymorphsLimit = 10000
+	const randomizePrice = ethers.utils.parseEther("0.01");
+	const bulkBuyLimit = 20
+	const arweaveContainer = "https://arweave.net/Xhx9MHp-zmtlOwaM9nSz8DTqnpUSdEAzlpn_lwyjeMg";
+
+	deployer.defaultOverrides = { gasLimit, gasPrice };
+	const result = await deployer.deploy(
+		PolymorphWithGeneChanger,
+		{},
+		tokenName,
+		tokenSymbol,
+		metadataURI,
+		DAOAddress,
+		premint,
+		geneChangePrice,
+		polymorphPrice,
+		polymorphsLimit,
+		randomizePrice,
+		bulkBuyLimit,
+		arweaveContainer);
 
 };
 
