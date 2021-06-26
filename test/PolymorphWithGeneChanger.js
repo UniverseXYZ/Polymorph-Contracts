@@ -15,12 +15,13 @@ describe('PolymorphWithGeneChanger', () => {
     let totalSupply = 30;
     let randomizeGenomePrice = ethers.utils.parseEther("0.01");
     let bulkBuyLimit = 20;
+    let arweaveAssetsJSON = 'JSON'
 
     before(async () => {
         const kekAddress = await DAO.signer.getAddress();
 
         deployer = new etherlime.EtherlimeGanacheDeployer(aliceAccount.secretKey);
-        polymorphInstance = await deployer.deploy(PolymorphWithGeneChanger, {}, "PolymorphWithGeneChanger", "POLY", "http://www.kekdao.com/", kekAddress, premintedTokensCount, defaultGenomeChangePrice, polymorphPrice, totalSupply, randomizeGenomePrice, bulkBuyLimit);
+        polymorphInstance = await deployer.deploy(PolymorphWithGeneChanger, {}, "PolymorphWithGeneChanger", "POLY", "http://www.kekdao.com/", kekAddress, premintedTokensCount, defaultGenomeChangePrice, polymorphPrice, totalSupply, randomizeGenomePrice, bulkBuyLimit, arweaveAssetsJSON);
     });
 
     it('should be valid address', async () => {
