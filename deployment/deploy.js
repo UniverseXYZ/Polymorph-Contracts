@@ -19,7 +19,7 @@ const deploy = async (network, secret, etherscanApiKey) => {
 	const polymorphsLimit = 10000
 	const randomizePrice = ethers.utils.parseEther("0.01");
 	const bulkBuyLimit = 20
-	const arweaveContainer = "https://arweave.net/Xhx9MHp-zmtlOwaM9nSz8DTqnpUSdEAzlpn_lwyjeMg";
+	const arweaveContainer = "https://arweave.net/9ZQ_0Z5RO_KslZYrUDPNNUE5ZKUM6UNZr_e4uo5Y3y8";
 
 	deployer.defaultOverrides = { gasLimit, gasPrice };
 	const result = await deployer.deploy(
