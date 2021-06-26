@@ -1,6 +1,7 @@
 const etherlime = require('etherlime-lib');
 const ethers = require('ethers');
 const PolymorphWithGeneChanger = require('../build/PolymorphWithGeneChanger.json');
+const TestContractInteractor = require('../build/TestContractInteractor.json');
 
 
 describe('PolymorphWithGeneChanger', () => {
@@ -89,7 +90,7 @@ describe('PolymorphWithGeneChanger', () => {
 
     it(`should not mint more than totalSupply: ${totalSupply}`, async () => {
         const cost = await polymorphInstance.polymorphPrice();
-        for (let i = 0; i < 3; i++ ) {
+        for (let i = 0; i < 3; i++) {
             await polymorphInstance.mint({ value: cost });
         }
         assert.revert(polymorphInstance.mint({ value: cost }));
@@ -155,6 +156,29 @@ describe('PolymorphWithGeneChanger', () => {
         assert(price.eq(defaultGenomeChangePrice), "The price was not the default");
     })
 
+    it('should not morph from a contract interactor', async () => {
+
+        const kekBalanceBefore = await DAO.signer.getBalance();
+
+        const geneBefore = await polymorphInstance.geneOf(2);
+
+        await polymorphInstance.randomizeGenome(2, { value: randomizeGenomePrice })
+
+        const geneAfter = await polymorphInstance.geneOf(2);
+
+        assert(!geneBefore.eq(geneAfter), "Genes did not change for EOW interaction");
+
+        const contractInteractor = await deployer.deploy(TestContractInteractor, {}, polymorphInstance.contractAddress)
+
+        const aliceAddress = await aliceAccount.signer.getAddress();
+
+        await polymorphInstance.transferFrom(aliceAddress, contractInteractor.contractAddress, 2);
+
+        await assert.revertWith(contractInteractor.triggerRandomize(2, { value: randomizeGenomePrice }), "Caller cannot be a contract");
+        await assert.revertWith(contractInteractor.triggerGeneChange(2, 2, { value: randomizeGenomePrice }), "Caller cannot be a contract");
+
+    })
+
     it('should change polymorph price', async () => {
 
         const oldPolymorphPrice = ethers.utils.parseEther("0.0777");
@@ -171,20 +195,20 @@ describe('PolymorphWithGeneChanger', () => {
         await assert.revertWith(polymorphInstance.setPolymorphPrice(newPolymorphPrice), "Not called from the dao");
     })
 
-    it('should change total supply', async () => {
+    it('should change max supply', async () => {
 
-        const oldTotalSupply = 30;
-        const newTotalSupply = 10000;
+        const oldMaxSupply = 30;
+        const newMaxSupply = 10000;
 
-        const totalSupplyBefore = await polymorphInstance.totalSupply();
-        assert(totalSupplyBefore.eq(oldTotalSupply), "The total supply was not 10 in the beginning");
+        const totalSupplyBefore = await polymorphInstance.maxSupply();
+        assert(totalSupplyBefore.eq(oldMaxSupply), "The max supply was not 10 in the beginning");
 
-        await polymorphInstance.from(DAO).setTotalSupply(newTotalSupply);
+        await polymorphInstance.from(DAO).setMaxSupply(newMaxSupply);
 
-        const totalSupplyAfter = await polymorphInstance.totalSupply();
-        assert(totalSupplyAfter.eq(newTotalSupply), "The total supply did not change");
+        const totalSupplyAfter = await polymorphInstance.maxSupply();
+        assert(totalSupplyAfter.eq(newMaxSupply), "The max supply did not change");
 
-        await assert.revertWith(polymorphInstance.setTotalSupply(newTotalSupply), "Not called from the dao");
+        await assert.revertWith(polymorphInstance.setMaxSupply(newMaxSupply), "Not called from the dao");
     })
 
     it('should change randomizeGenomePrice', async () => {
