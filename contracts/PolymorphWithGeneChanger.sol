@@ -2,6 +2,7 @@
 pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "./PolymorphGeneGenerator.sol";
 import "./Polymorph.sol";
 import "./IPolymorphWithGeneChanger.sol";
@@ -10,6 +11,7 @@ import "./IPolymorphWithGeneChanger.sol";
 contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
     using SafeMath for uint256;
+    using Address for address;
 
     mapping(uint256 => uint256) internal _genomeChanges;
     uint256 public baseGenomeChangePrice;
@@ -91,6 +93,7 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
     }
 
     function _beforeGenomeChange(uint256 tokenId) internal virtual {
+        require(!address(_msgSender()).isContract(), "Caller cannot be a contract");
         require(ownerOf(tokenId) == _msgSender(), "PolymorphWithGeneChanger: cannot change genome of token that is not own");
     }
     

@@ -18,14 +18,14 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, ReentrancyGuar
 
     address payable public daoAddress;
     uint256 public polymorphPrice;
-    uint256 private _totalSupply;
+    uint256 public maxSupply;
     uint256 public bulkBuyLimit;
     string public arweaveAssetsJSON;
 
     event TokenMorphed(uint256 indexed tokenId, uint256 oldGene, uint256 newGene, uint256 price, Polymorph.PolymorphEventType eventType);
     event TokenMinted(uint256 indexed tokenId, uint256 newGene);
     event PolymorphPriceChanged(uint256 newPolymorphPrice);
-    event TotalSupplyChanged(uint256 newTotalSupply);
+    event MaxSupplyChanged(uint256 newMaxSupply);
     event BulkBuyLimitChanged(uint256 newBulkBuyLimit);
     event BaseURIChanged(string baseURI);
     event arweaveAssetsJSONChanged(string arweaveAssetsJSON);
@@ -35,10 +35,10 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, ReentrancyGuar
      // Optional mapping for token URIs
     mapping (uint256 => uint256) internal _genes;
 
-    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, uint premintedTokensCount, uint256 _polymorphPrice, uint256 totalSupply, uint256 _bulkBuyLimit, string memory _arweaveAssetsJSON) ERC721PresetMinterPauserAutoId(name, symbol, baseURI) public {
+    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, uint premintedTokensCount, uint256 _polymorphPrice, uint256 _maxSupply, uint256 _bulkBuyLimit, string memory _arweaveAssetsJSON) ERC721PresetMinterPauserAutoId(name, symbol, baseURI) public {
         daoAddress = _daoAddress;
         polymorphPrice = _polymorphPrice;
-        _totalSupply = totalSupply;
+        maxSupply = _maxSupply;
         bulkBuyLimit = _bulkBuyLimit;
         arweaveAssetsJSON = _arweaveAssetsJSON;
         geneGenerator.random();
@@ -70,7 +70,7 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, ReentrancyGuar
     }
 
     function mint() public override payable nonReentrant {
-        require(_tokenIdTracker.current() < _totalSupply, "Total supply reached");
+        require(_tokenIdTracker.current() < maxSupply, "Total supply reached");
 
         _tokenIdTracker.increment();
 
@@ -94,7 +94,7 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, ReentrancyGuar
 
     function bulkBuy(uint256 amount) public override payable nonReentrant {
         require(amount <= bulkBuyLimit, "Cannot bulk buy more than the preset limit");
-        require(_tokenIdTracker.current().add(amount) <= _totalSupply, "Total supply reached");
+        require(_tokenIdTracker.current().add(amount) <= maxSupply, "Total supply reached");
         
         (bool transferToDaoStatus, ) = daoAddress.call{value:polymorphPrice.mul(amount)}("");
         require(transferToDaoStatus, "Address: unable to send value, recipient may have reverted");
@@ -132,10 +132,10 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, ReentrancyGuar
         emit PolymorphPriceChanged(newPolymorphPrice);
     }
 
-    function setTotalSupply(uint256 totalSupply) public override virtual onlyDAO {
-        _totalSupply = totalSupply;
+    function setMaxSupply(uint256 _maxSupply) public override virtual onlyDAO {
+        maxSupply = _maxSupply;
 
-        emit TotalSupplyChanged(totalSupply);
+        emit MaxSupplyChanged(maxSupply);
     }
 
     function setBulkBuyLimit(uint256 _bulkBuyLimit) public override virtual onlyDAO {
@@ -154,10 +154,6 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, ReentrancyGuar
         arweaveAssetsJSON = _arweaveAssetsJSON;
 
         emit arweaveAssetsJSONChanged(_arweaveAssetsJSON);
-    }
-
-    function totalSupply() public override view returns (uint256) {
-        return _totalSupply;
     }
 
     receive() external payable {
