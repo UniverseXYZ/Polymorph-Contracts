@@ -1,6 +1,6 @@
 # Polymorph
 ## Overview
-The goal of the system is to create NFTs that can change their form (genome). The changes need to be random, or as random as allowed by the on chain execution. The generation of the Polymorphs will be done via contract and the price for single NFT creation will be flat. In addition the holder of a polymorph can choose to pay to randomly mutate a single gene. This price for a single gene mutation is doubled after every starting at a minimum cost. Every user can randomize their polymorph reseting their genome change cost to the base cost.
+The goal of the system is to create NFTs that can change their form (genome). The changes need to be random, or as random as allowed by the on chain execution. The generation of the Polymorphs will be done via contract and the price for single NFT creation will be flat. In addition the holder of a polymorph can choose to pay to randomly mutate a single gene. This price for a single gene mutation is doubled after morph starting at a minimum cost. Every user can randomize their polymorph reseting their genome change cost to the base cost.
 ## Genome
 The genome - the combination of the different traits of a polymorph are called genome. The genome is represented by a uint256. Each two decimal places (apart from the last one) represent a single gene. This enables for 100 different options for each attribute.
 Randomization of the genome is based on generating a hash. The seed for this hash includes network and user specific parameters:
