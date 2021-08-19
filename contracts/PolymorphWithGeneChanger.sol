@@ -14,13 +14,21 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
     using Address for address;
 
     mapping(uint256 => uint256) internal _genomeChanges;
+    mapping(address => bool) public whitelistBridgeAddresses;
     uint256 public baseGenomeChangePrice;
     uint256 public randomizeGenomePrice;
 
     event BaseGenomeChangePriceChanged(uint256 newGenomeChange);
     event RandomizeGenomePriceChanged(uint256 newRandomizeGenomePriceChange);
 
-    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, uint premintedTokensCount, uint256 _baseGenomeChangePrice, uint256 _polymorphPrice, uint256 totalSupply, uint256 _randomizeGenomePrice, uint256 _bulkBuyLimit, string memory _arweaveAssetsJSON) Polymorph(name, symbol, baseURI, _daoAddress, premintedTokensCount, _polymorphPrice, totalSupply, _bulkBuyLimit, _arweaveAssetsJSON) {
+    enum PolymorphBridgeEventType { MORPH, SCRAMBLE }
+
+    modifier onlyBridge() {
+        require(whitelistBridgeAddresses[msg.sender], "Not called from the bridge");
+        _;
+    }
+
+    constructor(string memory name, string memory symbol, string memory baseURI, address payable _daoAddress, uint premintedTokensCount, uint256 _baseGenomeChangePrice, uint256 _polymorphPrice, uint256 totalSupply, uint256 _randomizeGenomePrice, uint256 _bulkBuyLimit, string memory _arweaveAssetsJSON, address _polymorphV1Address) Polymorph(name, symbol, baseURI, _daoAddress, premintedTokensCount, _polymorphPrice, totalSupply, _bulkBuyLimit, _arweaveAssetsJSON, _polymorphV1Address) {
         baseGenomeChangePrice = _baseGenomeChangePrice;
         randomizeGenomePrice = _randomizeGenomePrice;
     }
@@ -53,7 +61,7 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
         uint256 newTrait = geneGenerator.random()%100;
         _genes[tokenId] = replaceGene(oldGene, newTrait, genePosition);
         _genomeChanges[tokenId]++;
-        emit TokenMorphed(tokenId, oldGene, oldGene, price, PolymorphEventType.MORPH);
+        emit TokenMorphed(tokenId, oldGene, _genes[tokenId], price, PolymorphEventType.MORPH);
     }
 
     function replaceGene(uint256 genome, uint256 replacement, uint256 genePosition) internal virtual pure returns(uint256 newGene) {
@@ -86,6 +94,23 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
         emit TokenMorphed(tokenId, oldGene, _genes[tokenId], randomizeGenomePrice, PolymorphEventType.MORPH);
     }
 
+    function wormholeUpdateGene(uint256 tokenId, uint256 newGene, PolymorphWithGeneChanger.PolymorphBridgeEventType eventType) external nonReentrant onlyBridge {
+        uint256 oldGene = _genes[tokenId];
+        _genes[tokenId] = newGene;
+        
+        if (eventType == PolymorphBridgeEventType.SCRAMBLE) {
+            _genomeChanges[tokenId] = 0;
+        } else if (eventType == PolymorphBridgeEventType.MORPH) {
+            _genomeChanges[tokenId]++;
+        }
+
+        emit TokenMorphed(tokenId, oldGene, _genes[tokenId], randomizeGenomePrice, PolymorphEventType.MORPH);
+    }
+
+    function whitelistBridgeAddress(address bridgeAddress, bool status) external onlyDAO {
+        whitelistBridgeAddresses[bridgeAddress] = status;
+    }
+
     function priceForGenomeChange(uint256 tokenId) public override virtual view returns(uint256 price) {
         uint256 pastChanges = _genomeChanges[tokenId];
 
@@ -94,6 +119,7 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
 
     function _beforeGenomeChange(uint256 tokenId) internal virtual {
         require(!address(_msgSender()).isContract(), "Caller cannot be a contract");
+        require(_msgSender() == tx.origin, "Msg sender should be original caller");
         require(ownerOf(tokenId) == _msgSender(), "PolymorphWithGeneChanger: cannot change genome of token that is not own");
     }
     
