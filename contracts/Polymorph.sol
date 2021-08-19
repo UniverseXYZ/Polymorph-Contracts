@@ -105,8 +105,8 @@ contract Polymorph is IPolymorph, ERC721PresetMinterPauserAutoId, ReentrancyGuar
         polymorphV1Contract.burn(tokenId);
 
         totalBurnedV1 = totalBurnedV1.add(1);
-        _tokenIdTracker.increment();
         maxSupply = maxSupply.add(totalBurnedV1);
+        _tokenIdTracker.increment();
 
         uint256 newTokenId = _tokenIdTracker.current();
         _genes[newTokenId] = geneToTransfer;
