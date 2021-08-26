@@ -6,3 +6,8 @@ flat
 .env
 .envrc
 .vscode
+artifacts
+cache
+deploy.sh
+jsconfig.json
+hardhat.config.js
