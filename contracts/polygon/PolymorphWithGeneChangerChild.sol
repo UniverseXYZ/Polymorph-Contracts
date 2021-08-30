@@ -3,17 +3,20 @@ pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "./PolymorphGeneGenerator.sol";
-import "./Polymorph.sol";
-import "./IPolymorphWithGeneChanger.sol";
+import "../PolymorphGeneGenerator.sol";
+import "./PolymorphChild.sol";
+import "./IPolymorphWithGeneChangerChild.sol";
 
-contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
+contract PolymorphWithGeneChangerChild is
+    IPolymorphWithGeneChangerChild,
+    PolymorphChild
+{
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
     using SafeMath for uint256;
     using Address for address;
 
     mapping(uint256 => uint256) internal _genomeChanges;
-    mapping(address => bool) public whitelistBridgeAddresses;
+    mapping(address => bool) public whitelistTunnelAddresses;
     mapping(uint256 => bool) public isNotVirgin;
     uint256 public baseGenomeChangePrice;
     uint256 public randomizeGenomePrice;
@@ -21,10 +24,10 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
     event BaseGenomeChangePriceChanged(uint256 newGenomeChange);
     event RandomizeGenomePriceChanged(uint256 newRandomizeGenomePriceChange);
 
-    modifier onlyBridge() {
+    modifier onlyTunnel() {
         require(
-            whitelistBridgeAddresses[msg.sender],
-            "Not called from the bridge"
+            whitelistTunnelAddresses[_msgSender()],
+            "Not called from the tunnel"
         );
         _;
     }
@@ -34,28 +37,10 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
         string memory symbol,
         string memory baseURI,
         address payable _daoAddress,
-        uint256 premintedTokensCount,
         uint256 _baseGenomeChangePrice,
-        uint256 _polymorphPrice,
-        uint256 totalSupply,
         uint256 _randomizeGenomePrice,
-        uint256 _bulkBuyLimit,
-        string memory _arweaveAssetsJSON,
-        address _polymorphV1Address
-    )
-        Polymorph(
-            name,
-            symbol,
-            baseURI,
-            _daoAddress,
-            premintedTokensCount,
-            _polymorphPrice,
-            totalSupply,
-            _bulkBuyLimit,
-            _arweaveAssetsJSON,
-            _polymorphV1Address
-        )
-    {
+        string memory _arweaveAssetsJSON
+    ) PolymorphChild(name, symbol, baseURI, _daoAddress, _arweaveAssetsJSON) {
         baseGenomeChangePrice = _baseGenomeChangePrice;
         randomizeGenomePrice = _randomizeGenomePrice;
     }
@@ -179,7 +164,7 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
         external
         onlyDAO
     {
-        whitelistBridgeAddresses[bridgeAddress] = status;
+        whitelistTunnelAddresses[bridgeAddress] = status;
     }
 
     function priceForGenomeChange(uint256 tokenId)
@@ -227,7 +212,7 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
         uint256 gene,
         bool isVirgin,
         uint256 genomeChangesCount
-    ) external nonReentrant onlyBridge {
+    ) external nonReentrant onlyTunnel {
         uint256 oldGene = _genes[tokenId];
         _genes[tokenId] = gene;
         isNotVirgin[tokenId] = isVirgin;
@@ -246,7 +231,7 @@ contract PolymorphWithGeneChanger is IPolymorphWithGeneChanger, Polymorph {
         uint256 tokenId,
         address ownerAddress,
         uint256 gene
-    ) public nonReentrant onlyBridge {
+    ) public nonReentrant onlyTunnel {
         _mint(ownerAddress, tokenId);
         //TODO: Ask Stan/George if this emit events is ok because after that we will be changing the gene
         emit TokenMinted(tokenId, gene);

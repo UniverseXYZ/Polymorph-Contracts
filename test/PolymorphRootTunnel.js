@@ -4,7 +4,9 @@ describe('PolymorphRootTunnel', () => {
   let tunnelInstance, exposedTunnelInstance;
   const goerliCheckpointManager = "0x2890bA17EfE978480615e330ecB65333b880928e";
   const goerliFxRoot = "0x3d1d3E34f7fB6D26245E6640E1c50710eFFf15bA";
-  const daoAddress = "0x75D38741878da8520d1Ae6db298A9BD994A5D241";
+  
+  // This is hardhat user address
+  const daoAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
 
   before(async () => {
     const PolymorphRootTunnel = await ethers.getContractFactory("PolymorphRootTunnel");
@@ -34,5 +36,17 @@ describe('PolymorphRootTunnel', () => {
     expect(result.gene).eq(gene);
     expect(result.isVirgin).eq(true);
     expect(result.genomeChanges.toNumber()).eq(genomeChanges);
+  });
+
+  it('Dao address should be able to set polymorph contract', async () => {
+    await expect(tunnelInstance.setPolymorphContract("0x3d1d3E34f7fB6D26245E6640E1c50710eFFf15bA")).to.not.be.reverted;
+  });
+
+  it('Polymorph contract should change', async () => {
+    const newPolymorphAddress = "0x3d1d3E34f7fB6D26245E6640E1c50710eFFf15bA";
+
+    await tunnelInstance.setPolymorphContract(newPolymorphAddress);
+
+     expect(await tunnelInstance.polymorphContract()).to.eq(newPolymorphAddress)
   })
 })

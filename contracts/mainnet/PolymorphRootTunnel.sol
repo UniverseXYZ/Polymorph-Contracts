@@ -1,16 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.7.0;
 
-import "./FxBaseRootTunnel.sol";
+import "../tunnel/FxBaseRootTunnel.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721Holder.sol";
-import "../PolymorphWithGeneChanger.sol";
-import "./PolymorphBaseTunnel.sol";
+import "../PolymorphBaseTunnel.sol";
+import "../IPolymorphsWormhole.sol";
+import "../mainnet/PolymorphWithGeneChangerRoot.sol";
 
 contract PolymorphRootTunnel is
     FxBaseRootTunnel,
     ERC721Holder,
-    PolymorphBaseTunnel
+    PolymorphBaseTunnel,
+    IPolymorphsWormhole
 {
     constructor(
         address _checkpointManager,
@@ -20,6 +22,8 @@ contract PolymorphRootTunnel is
         FxBaseRootTunnel(_checkpointManager, _fxRoot)
         PolymorphBaseTunnel(_daoAddress)
     {}
+
+    PolymorphWithGeneChangerRoot public polymorphContract;
 
     modifier onlyOwner(uint256 tokenId) {
         require(
@@ -74,5 +78,12 @@ contract PolymorphRootTunnel is
                 polymorphContract.genomeChanges(tokenId)
             )
         );
+    }
+
+    function setPolymorphContract(address payable contractAddress)
+        public
+        onlyDAO
+    {
+        polymorphContract = PolymorphWithGeneChangerRoot(contractAddress);
     }
 }

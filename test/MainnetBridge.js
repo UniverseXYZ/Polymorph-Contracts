@@ -1,4 +1,3 @@
-const { BigNumber } = require("@ethersproject/bignumber");
 const { expect } = require("chai");
 
 describe('Polymorph Mainnet Integration', () => {
@@ -21,7 +20,6 @@ describe('Polymorph Mainnet Integration', () => {
   let bulkBuyLimit = 20;
   let arweaveAssetsJSON = 'JSON'
 
-
   before(async () => {
     const PolymorphRootTunnel = await ethers.getContractFactory("PolymorphRootTunnel");
     tunnelInstance = await PolymorphRootTunnel.deploy(goerliCheckpointManager, goerliFxRoot, daoAddress);
@@ -31,24 +29,40 @@ describe('Polymorph Mainnet Integration', () => {
     exposedTunnelInstance = await ExposedPolymorphRootTunnel.deploy(goerliCheckpointManager, goerliFxRoot, daoAddress);
     console.log(`exposed tunnel contract deployed to: ${exposedTunnelInstance.address}`);
     
-    const Polymorph = await ethers.getContractFactory("PolymorphWithGeneChanger");
-    polymorphInstance = await Polymorph.deploy(name, token, baseUri, daoAddress, premintedTokensCount, defaultGenomeChangePrice, polymorphPrice, totalSupply, randomizeGenomePrice, bulkBuyLimit, arweaveAssetsJSON, polymorphV1Address, exposedTunnelInstance.address);
+    const Polymorph = await ethers.getContractFactory("PolymorphWithGeneChangerRoot");
+    polymorphInstance = await Polymorph.deploy(name, token, baseUri, daoAddress, premintedTokensCount, defaultGenomeChangePrice, polymorphPrice, totalSupply, randomizeGenomePrice, bulkBuyLimit, arweaveAssetsJSON, polymorphV1Address);
     console.log(`polymorph contract deployed to: ${polymorphInstance.address}`);
 
     await tunnelInstance.setPolymorphContract(polymorphInstance.address);
     await exposedTunnelInstance.setPolymorphContract(polymorphInstance.address);
+
+    polymorphInstance.whitelistBridgeAddress(exposedTunnelInstance.address, true);
+  });
+
+  it('moveThroughWormhole should revert if polymorph has not been approved for transfer', async() => {
+    const tokenId = 1;  
+    
+    await polymorphInstance.bulkBuy(tokenId, {value: polymorphPrice.mul(tokenId)});
+
+    await expect(exposedTunnelInstance.moveThroughWormhole(tokenId), "").to.be.reverted;
+  });
+
+  it('moveThroughWormhole should not revert if polymorph has been approved for transfer', async() => {
+    const tokenId = 2;  
+
+    await polymorphInstance.bulkBuy(tokenId, {value: polymorphPrice.mul(tokenId)});
+
+    await polymorphInstance.approve(exposedTunnelInstance.address, tokenId);
+
+    await expect(exposedTunnelInstance.moveThroughWormhole(tokenId), "").to.not.be.reverted;
   });
 
   it('Should take polymorph from owner and lock it in bridge', async () => {
+    const tokenId = 3;
     const [user] = await ethers.getSigners();
-    const tokenId = 2;
-
     console.log(`My address: ${user.address}`);
-
-    const price = await polymorphInstance.polymorphPrice();
-    console.log(`Price: ${price}`);
-
-    await polymorphInstance.bulkBuy(tokenId, {value: price.mul(tokenId)});
+  
+    await polymorphInstance.bulkBuy(tokenId, {value: polymorphPrice.mul(tokenId)});
 
     //Assert owner after minting
     let polymorphOwner = await polymorphInstance.ownerOf(tokenId);
@@ -57,11 +71,7 @@ describe('Polymorph Mainnet Integration', () => {
     //Approve transfering of nft
     await polymorphInstance.approve(exposedTunnelInstance.address, tokenId);
 
-    const gene = await polymorphInstance.geneOf(tokenId);
-    const isNotVirgin = await polymorphInstance.isNotVirgin(tokenId);
-    const genomeChanges = await polymorphInstance.genomeChanges(tokenId);
-
-    await exposedTunnelInstance.moveThroughWormhole(tokenId, gene, isNotVirgin, genomeChanges);
+    await exposedTunnelInstance.moveThroughWormhole(tokenId);
 
     //Assert owner after moving thourgh wormhole
     polymorphOwner = await polymorphInstance.ownerOf(tokenId);
@@ -69,23 +79,16 @@ describe('Polymorph Mainnet Integration', () => {
   });
 
   it('Should return ownership of polymorph', async() => {
+    const tokenId = 4;
     const [user] = await ethers.getSigners();
-    const tokenId = 3;
-
     console.log(`My address: ${user.address}`);
-
-    const price = await polymorphInstance.polymorphPrice();
-
-    await polymorphInstance.bulkBuy(tokenId, {value: price.mul(tokenId)});
+    
+    await polymorphInstance.bulkBuy(tokenId, {value: polymorphPrice.mul(tokenId)});
 
     //Approve transfering of nft
     await polymorphInstance.approve(exposedTunnelInstance.address, tokenId);
 
-    const gene = await polymorphInstance.geneOf(tokenId);
-    const isNotVirgin = await polymorphInstance.isNotVirgin(tokenId);
-    const genomeChanges = await polymorphInstance.genomeChanges(tokenId);
-
-    await exposedTunnelInstance.moveThroughWormhole(tokenId, gene, isNotVirgin, genomeChanges);
+    await exposedTunnelInstance.moveThroughWormhole(tokenId);
 
     polymorphOwner = await polymorphInstance.ownerOf(tokenId);
     expect(polymorphOwner).eq(exposedTunnelInstance.address);
@@ -101,25 +104,20 @@ describe('Polymorph Mainnet Integration', () => {
   });
 
   it('Should update polymoprh info correctly', async() => {
-    const [user] = await ethers.getSigners();
     const tokenId = 5;
+    const [user] = await ethers.getSigners();
+    console.log(`My address: ${user.address}`);
+  
+    await polymorphInstance.bulkBuy(tokenId, {value: polymorphPrice.mul(tokenId)});
+
     const newGene = "1231231312312312312312113";
     const newVirginity = false;
     const newChangesCount = 3;
-    console.log(`My address: ${user.address}`);
-
-    const price = await polymorphInstance.polymorphPrice();
-    
-    await polymorphInstance.bulkBuy(tokenId, {value: price.mul(tokenId)});
 
     //Approve transfering of nft
     await polymorphInstance.approve(exposedTunnelInstance.address, tokenId);
 
-    const gene = await polymorphInstance.geneOf(tokenId);
-    const isNotVirgin = await polymorphInstance.isNotVirgin(tokenId);
-    const genomeChanges = await polymorphInstance.genomeChanges(tokenId);
-
-    await exposedTunnelInstance.moveThroughWormhole(tokenId, gene, isNotVirgin, genomeChanges);
+    await exposedTunnelInstance.moveThroughWormhole(tokenId);
 
     const keccak = ethers.utils.defaultAbiCoder.encode(
       ["uint256", "address", "uint256", "bool", "uint256"],
@@ -134,4 +132,5 @@ describe('Polymorph Mainnet Integration', () => {
     const baseGenomeChangePrice = await polymorphInstance.baseGenomeChangePrice();
     expect(await polymorphInstance.priceForGenomeChange(tokenId)).eq(baseGenomeChangePrice.mul((2**newChangesCount)));
   });
+
 })

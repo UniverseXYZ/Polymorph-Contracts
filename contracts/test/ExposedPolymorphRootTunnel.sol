@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.7.0;
 
-import "../tunnel/PolymorphRootTunnel.sol";
+import "../mainnet/PolymorphRootTunnel.sol";
 
 // Exposes internal functions so they can be called in tests
 contract ExposedPolymorphRootTunnel is PolymorphRootTunnel {

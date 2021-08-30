@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.7.0;
-import "../PolymorphWithGeneChanger.sol";
+import "./IPolymorphsWormhole.sol";
 
 abstract contract PolymorphBaseTunnel {
     address payable public daoAddress;
-    PolymorphWithGeneChanger internal polymorphContract;
 
     constructor(address payable _daoAddress) {
         daoAddress = _daoAddress;
@@ -28,13 +27,4 @@ abstract contract PolymorphBaseTunnel {
     {
         return abi.decode(data, (uint256, address, uint256, bool, uint256));
     }
-
-    function setPolymorphContract(address payable contractAddress)
-        public
-        onlyDAO
-    {
-        polymorphContract = PolymorphWithGeneChanger(contractAddress);
-    }
-
-    function moveThroughWormhole(uint256 tokenId) public virtual;
 }

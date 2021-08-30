@@ -4,13 +4,13 @@ pragma solidity ^0.7.0;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "./ERC721PresetMinterPauserAutoId.sol";
-import "./PolymorphGeneGenerator.sol";
-import "./IPolymorph.sol";
+import "../ERC721PresetMinterPauserAutoId.sol";
+import "../PolymorphGeneGenerator.sol";
+import "./IPolymorphRoot.sol";
 import "./IPolymorphV1.sol";
 
-contract Polymorph is
-    IPolymorph,
+contract PolymorphRoot is
+    IPolymorphRoot,
     ERC721PresetMinterPauserAutoId,
     ReentrancyGuard
 {
@@ -34,7 +34,7 @@ contract Polymorph is
         uint256 oldGene,
         uint256 newGene,
         uint256 price,
-        Polymorph.PolymorphEventType eventType
+        PolymorphRoot.PolymorphEventType eventType
     );
     event TokenMinted(uint256 indexed tokenId, uint256 newGene);
     event TokenBurnedAndMinted(
@@ -90,7 +90,7 @@ contract Polymorph is
     }
 
     modifier onlyDAO() {
-        require(msg.sender == daoAddress, "Not called from the dao");
+        require(_msgSender() == daoAddress, "Not called from the dao");
         _;
     }
 

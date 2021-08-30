@@ -1,14 +1,25 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.7.0;
 
-import "./FxBaseChildTunnel.sol";
-import "./PolymorphBaseTunnel.sol";
+import "../tunnel/FxBaseChildTunnel.sol";
+import "../PolymorphBaseTunnel.sol";
+import "../polygon/PolymorphWithGeneChangerChild.sol";
+import "../IPolymorphsWormhole.sol";
 
-contract PolymorphChildTunnel is FxBaseChildTunnel, PolymorphBaseTunnel {
+contract PolymorphChildTunnel is
+    FxBaseChildTunnel,
+    PolymorphBaseTunnel,
+    IPolymorphsWormhole
+{
     constructor(address _fxChild, address payable _daoAddress)
         FxBaseChildTunnel(_fxChild)
         PolymorphBaseTunnel(_daoAddress)
     {}
+
+    PolymorphWithGeneChangerChild public polymorphContract;
+    uint256 public latestStateId;
+    address public latestRootMessageSender;
+    bytes public latestData;
 
     modifier onlyOwner(uint256 tokenId) {
         require(
@@ -23,6 +34,10 @@ contract PolymorphChildTunnel is FxBaseChildTunnel, PolymorphBaseTunnel {
         address sender,
         bytes memory data
     ) internal override {
+        latestStateId = stateId;
+        latestRootMessageSender = sender;
+        latestData = data;
+
         (
             uint256 tokenId,
             address ownerAddress,
@@ -41,19 +56,26 @@ contract PolymorphChildTunnel is FxBaseChildTunnel, PolymorphBaseTunnel {
     }
 
     function moveThroughWormhole(uint256 tokenId)
-        public
+        external
         override
         onlyOwner(tokenId)
     {
-        polymorphContract.burn(tokenId);
         uint256 gene = polymorphContract.geneOf(tokenId);
         bool isNotVirgin = polymorphContract.isNotVirgin(tokenId);
         uint256 genomeChanges = polymorphContract.genomeChanges(tokenId);
+        polymorphContract.burn(tokenId);
 
         //TODO: Maybe clear gene and genomeChanges
         // It may not be a problem because when we mint on polygon they will be overwritten
         _sendMessageToRoot(
             abi.encode(tokenId, msg.sender, gene, isNotVirgin, genomeChanges)
         );
+    }
+
+    function setPolymorphContract(address payable contractAddress)
+        public
+        onlyDAO
+    {
+        polymorphContract = PolymorphWithGeneChangerChild(contractAddress);
     }
 }
