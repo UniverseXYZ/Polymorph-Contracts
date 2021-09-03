@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@openzeppelin/contracts": "^3.4.1",
+    "dotenv": "^10.0.0",
     "etherlime-lib": "^1.2.5",
     "solc": "^0.7.5"
   },
