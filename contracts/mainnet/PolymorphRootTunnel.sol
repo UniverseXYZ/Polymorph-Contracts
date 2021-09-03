@@ -2,17 +2,14 @@
 pragma solidity ^0.7.0;
 
 import "../tunnel/FxBaseRootTunnel.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "../base/PolymorphTunnel.sol";
+import "./PolymorphRoot.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721Holder.sol";
-import "../PolymorphBaseTunnel.sol";
-import "../IPolymorphsWormhole.sol";
-import "../mainnet/PolymorphWithGeneChangerRoot.sol";
 
 contract PolymorphRootTunnel is
     FxBaseRootTunnel,
     ERC721Holder,
-    PolymorphBaseTunnel,
-    IPolymorphsWormhole
+    PolymorphTunnel
 {
     constructor(
         address _checkpointManager,
@@ -20,10 +17,10 @@ contract PolymorphRootTunnel is
         address payable _daoAddress
     )
         FxBaseRootTunnel(_checkpointManager, _fxRoot)
-        PolymorphBaseTunnel(_daoAddress)
+        PolymorphTunnel(_daoAddress)
     {}
 
-    PolymorphWithGeneChangerRoot public polymorphContract;
+    PolymorphRoot public polymorphContract;
 
     modifier onlyOwner(uint256 tokenId) {
         require(
@@ -84,6 +81,6 @@ contract PolymorphRootTunnel is
         public
         onlyDAO
     {
-        polymorphContract = PolymorphWithGeneChangerRoot(contractAddress);
+        polymorphContract = PolymorphRoot(contractAddress);
     }
 }

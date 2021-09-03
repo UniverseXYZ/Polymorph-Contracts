@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.7.0;
 
-import "./IPolymorphRoot.sol";
-
-interface IPolymorphWithGeneChangerRoot is IPolymorphRoot {
+interface IPolymorphWithGeneChanger {
     function morphGene(uint256 tokenId, uint256 genePosition) external payable;
 
     function randomizeGenome(uint256 tokenId) external payable;
@@ -17,4 +15,12 @@ interface IPolymorphWithGeneChangerRoot is IPolymorphRoot {
 
     function changeRandomizeGenomePrice(uint256 newRandomizeGenomePrice)
         external;
+
+    function whitelistBridgeAddress(address bridgeAddress, bool status)
+        external;
+
+    function genomeChanges(uint256 tokenId)
+        external
+        view
+        returns (uint256 genomeChnages);
 }

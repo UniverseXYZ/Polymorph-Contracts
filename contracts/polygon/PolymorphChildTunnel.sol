@@ -2,21 +2,16 @@
 pragma solidity ^0.7.0;
 
 import "../tunnel/FxBaseChildTunnel.sol";
-import "../PolymorphBaseTunnel.sol";
-import "../polygon/PolymorphWithGeneChangerChild.sol";
-import "../IPolymorphsWormhole.sol";
+import "../base/PolymorphTunnel.sol";
+import "../polygon/PolymorphChild.sol";
 
-contract PolymorphChildTunnel is
-    FxBaseChildTunnel,
-    PolymorphBaseTunnel,
-    IPolymorphsWormhole
-{
+contract PolymorphChildTunnel is FxBaseChildTunnel, PolymorphTunnel {
     constructor(address _fxChild, address payable _daoAddress)
         FxBaseChildTunnel(_fxChild)
-        PolymorphBaseTunnel(_daoAddress)
+        PolymorphTunnel(_daoAddress)
     {}
 
-    PolymorphWithGeneChangerChild public polymorphContract;
+    PolymorphChild public polymorphContract;
     uint256 public latestStateId;
     address public latestRootMessageSender;
     bytes public latestData;
@@ -76,6 +71,6 @@ contract PolymorphChildTunnel is
         public
         onlyDAO
     {
-        polymorphContract = PolymorphWithGeneChangerChild(contractAddress);
+        polymorphContract = PolymorphChild(contractAddress);
     }
 }

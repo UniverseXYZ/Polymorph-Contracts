@@ -1,61 +1,25 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.7.0;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "../ERC721PresetMinterPauserAutoId.sol";
-import "../PolymorphGeneGenerator.sol";
 import "./IPolymorphRoot.sol";
-import "./IPolymorphV1.sol";
+import "../base/Polymorph.sol";
+import "../base/PolymorphWithGeneChanger.sol";
 
-contract PolymorphRoot is
-    IPolymorphRoot,
-    ERC721PresetMinterPauserAutoId,
-    ReentrancyGuard
-{
+contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
     using SafeMath for uint256;
     using Counters for Counters.Counter;
 
-    PolymorphGeneGenerator.Gene internal geneGenerator;
-
-    address payable public daoAddress;
     uint256 public polymorphPrice;
     uint256 public maxSupply;
     uint256 public bulkBuyLimit;
-    string public arweaveAssetsJSON;
 
-    IPolymorphV1 public polymorphV1Contract;
+    Polymorph public polymorphV1Contract;
     uint256 public totalBurnedV1;
 
-    event TokenMorphed(
-        uint256 indexed tokenId,
-        uint256 oldGene,
-        uint256 newGene,
-        uint256 price,
-        PolymorphRoot.PolymorphEventType eventType
-    );
-    event TokenMinted(uint256 indexed tokenId, uint256 newGene);
-    event TokenBurnedAndMinted(
-        uint256 indexed oldTokenId,
-        uint256 indexed newTokenId,
-        uint256 gene
-    );
     event PolymorphPriceChanged(uint256 newPolymorphPrice);
     event MaxSupplyChanged(uint256 newMaxSupply);
     event BulkBuyLimitChanged(uint256 newBulkBuyLimit);
-    event BaseURIChanged(string baseURI);
-    event ArweaveAssetsJSONChanged(string arweaveAssetsJSON);
-
-    enum PolymorphEventType {
-        MINT,
-        MORPH,
-        TRANSFER
-    }
-
-    // Optional mapping for token URIs
-    mapping(uint256 => uint256) internal _genes;
 
     constructor(
         string memory name,
@@ -63,18 +27,29 @@ contract PolymorphRoot is
         string memory baseURI,
         address payable _daoAddress,
         uint256 premintedTokensCount,
+        uint256 _baseGenomeChangePrice,
         uint256 _polymorphPrice,
         uint256 _maxSupply,
+        uint256 _randomizeGenomePrice,
         uint256 _bulkBuyLimit,
         string memory _arweaveAssetsJSON,
         address _polymorphV1Address
-    ) public ERC721PresetMinterPauserAutoId(name, symbol, baseURI) {
-        daoAddress = _daoAddress;
+    )
+        PolymorphWithGeneChanger(
+            name,
+            symbol,
+            baseURI,
+            _daoAddress,
+            _baseGenomeChangePrice,
+            _randomizeGenomePrice,
+            _arweaveAssetsJSON
+        )
+    {
         polymorphPrice = _polymorphPrice;
         maxSupply = _maxSupply;
         bulkBuyLimit = _bulkBuyLimit;
         arweaveAssetsJSON = _arweaveAssetsJSON;
-        polymorphV1Contract = IPolymorphV1(_polymorphV1Address);
+        polymorphV1Contract = Polymorph(_polymorphV1Address);
         geneGenerator.random();
 
         _preMint(premintedTokensCount);
@@ -87,36 +62,6 @@ contract PolymorphRoot is
             _genes[tokenId] = geneGenerator.random();
             _mint(_msgSender(), tokenId);
         }
-    }
-
-    modifier onlyDAO() {
-        require(_msgSender() == daoAddress, "Not called from the dao");
-        _;
-    }
-
-    function geneOf(uint256 tokenId)
-        public
-        view
-        virtual
-        override
-        returns (uint256 gene)
-    {
-        return _genes[tokenId];
-    }
-
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual override(ERC721PresetMinterPauserAutoId) {
-        ERC721PresetMinterPauserAutoId._beforeTokenTransfer(from, to, tokenId);
-        emit TokenMorphed(
-            tokenId,
-            _genes[tokenId],
-            _genes[tokenId],
-            0,
-            PolymorphEventType.TRANSFER
-        );
     }
 
     function mint() public payable override nonReentrant {
@@ -218,11 +163,11 @@ contract PolymorphRoot is
         }
     }
 
-    function lastTokenId() public view override returns (uint256 tokenId) {
-        return _tokenIdTracker.current();
-    }
-
-    function mint(address to) public override(ERC721PresetMinterPauserAutoId) {
+    function mint(address to)
+        public
+        pure
+        override(ERC721PresetMinterPauserAutoId)
+    {
         revert("Should not use this one");
     }
 
@@ -252,22 +197,6 @@ contract PolymorphRoot is
         bulkBuyLimit = _bulkBuyLimit;
 
         emit BulkBuyLimitChanged(_bulkBuyLimit);
-    }
-
-    function setBaseURI(string memory _baseURI) public virtual onlyDAO {
-        _setBaseURI(_baseURI);
-
-        emit BaseURIChanged(_baseURI);
-    }
-
-    function setArweaveAssetsJSON(string memory _arweaveAssetsJSON)
-        public
-        virtual
-        onlyDAO
-    {
-        arweaveAssetsJSON = _arweaveAssetsJSON;
-
-        emit ArweaveAssetsJSONChanged(_arweaveAssetsJSON);
     }
 
     receive() external payable {

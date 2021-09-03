@@ -3,34 +3,27 @@ pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "../PolymorphGeneGenerator.sol";
-import "./PolymorphChild.sol";
-import "./IPolymorphWithGeneChangerChild.sol";
+import "../lib/PolymorphGeneGenerator.sol";
+import "../modifiers/Tunnel.sol";
+import "./Polymorph.sol";
+import "./IPolymorphWithGeneChanger.sol";
 
-contract PolymorphWithGeneChangerChild is
-    IPolymorphWithGeneChangerChild,
-    PolymorphChild
+abstract contract PolymorphWithGeneChanger is
+    IPolymorphWithGeneChanger,
+    Polymorph,
+    Tunnel
 {
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
     using SafeMath for uint256;
     using Address for address;
 
     mapping(uint256 => uint256) internal _genomeChanges;
-    mapping(address => bool) public whitelistTunnelAddresses;
     mapping(uint256 => bool) public isNotVirgin;
     uint256 public baseGenomeChangePrice;
     uint256 public randomizeGenomePrice;
 
     event BaseGenomeChangePriceChanged(uint256 newGenomeChange);
     event RandomizeGenomePriceChanged(uint256 newRandomizeGenomePriceChange);
-
-    modifier onlyTunnel() {
-        require(
-            whitelistTunnelAddresses[_msgSender()],
-            "Not called from the tunnel"
-        );
-        _;
-    }
 
     constructor(
         string memory name,
@@ -40,7 +33,7 @@ contract PolymorphWithGeneChangerChild is
         uint256 _baseGenomeChangePrice,
         uint256 _randomizeGenomePrice,
         string memory _arweaveAssetsJSON
-    ) PolymorphChild(name, symbol, baseURI, _daoAddress, _arweaveAssetsJSON) {
+    ) Polymorph(name, symbol, baseURI, _daoAddress, _arweaveAssetsJSON) {
         baseGenomeChangePrice = _baseGenomeChangePrice;
         randomizeGenomePrice = _randomizeGenomePrice;
     }
@@ -162,6 +155,7 @@ contract PolymorphWithGeneChangerChild is
 
     function whitelistBridgeAddress(address bridgeAddress, bool status)
         external
+        override
         onlyDAO
     {
         whitelistTunnelAddresses[bridgeAddress] = status;
@@ -182,6 +176,7 @@ contract PolymorphWithGeneChangerChild is
     function genomeChanges(uint256 tokenId)
         public
         view
+        override
         returns (uint256 genomeChnages)
     {
         return _genomeChanges[tokenId];
@@ -225,15 +220,5 @@ contract PolymorphWithGeneChangerChild is
             priceForGenomeChange(tokenId),
             PolymorphEventType.MORPH
         );
-    }
-
-    function mintPolymorphWithInfo(
-        uint256 tokenId,
-        address ownerAddress,
-        uint256 gene
-    ) public nonReentrant onlyTunnel {
-        _mint(ownerAddress, tokenId);
-        //TODO: Ask Stan/George if this emit events is ok because after that we will be changing the gene
-        emit TokenMinted(tokenId, gene);
     }
 }

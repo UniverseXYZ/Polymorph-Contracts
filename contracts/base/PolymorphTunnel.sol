@@ -1,18 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.7.0;
-import "./IPolymorphsWormhole.sol";
+import "./IPolymorphsTunnel.sol";
+import "../modifiers/DAO.sol";
 
-abstract contract PolymorphBaseTunnel {
-    address payable public daoAddress;
-
-    constructor(address payable _daoAddress) {
-        daoAddress = _daoAddress;
-    }
-
-    modifier onlyDAO() {
-        require(msg.sender == daoAddress, "Not called from the dao");
-        _;
-    }
+abstract contract PolymorphTunnel is DAO, IPolymorphsTunnel {
+    constructor(address payable _daoAddress) DAO(_daoAddress) {}
 
     function _decodeMessage(bytes memory data)
         internal
