@@ -6,7 +6,7 @@ describe('Polymorph Polygon Integration', () => {
   const goerliFxChild = "0xCf73231F28B7331BBe3124B907840A94851f9f11";
 
   //Polymorph constructor arguments
-  let name = "PolymorphWithGeneChanger";
+  let name = "PolymorphChild";
   let token = "MORPH";
   let baseUri = "";
   let daoAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
@@ -29,7 +29,7 @@ describe('Polymorph Polygon Integration', () => {
     exposedTunnelInstance = await ExposedPolymorphChildTunnel.deploy(goerliFxChild, daoAddress);
     console.log(`exposed tunnel contract deployed to: ${exposedTunnelInstance.address}`);
     
-    const Polymorph = await ethers.getContractFactory("PolymorphWithGeneChangerChild");
+    const Polymorph = await ethers.getContractFactory("PolymorphChild");
     polymorphInstance = await Polymorph.deploy(name, token, baseUri, daoAddress, defaultGenomeChangePrice, randomizeGenomePrice, arweaveAssetsJSON);
     console.log(`polymorph contract deployed to: ${polymorphInstance.address}`);
 

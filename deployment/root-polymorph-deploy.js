@@ -27,7 +27,7 @@ async function PolymorphDeploy() {
 	const arweaveContainer = "https://arweave.net/5KDDRA5EE9p-Bw29ryB9Uz6SvMRNMCyXKkOzW_ZT9gA";
 	const polymorphV1Address = "0x75D38741878da8520d1Ae6db298A9BD994A5D241";
 
-  const Polymorph = await hre.ethers.getContractFactory("PolymorphWithGeneChangerRoot");
+  const Polymorph = await hre.ethers.getContractFactory("PolymorphWithGeneChanger");
   const polymorph = await Polymorph.deploy(
     tokenName, 
     tokenSymbol, 

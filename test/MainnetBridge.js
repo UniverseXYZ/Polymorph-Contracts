@@ -29,7 +29,7 @@ describe('Polymorph Mainnet Integration', () => {
     exposedTunnelInstance = await ExposedPolymorphRootTunnel.deploy(goerliCheckpointManager, goerliFxRoot, daoAddress);
     console.log(`exposed tunnel contract deployed to: ${exposedTunnelInstance.address}`);
     
-    const Polymorph = await ethers.getContractFactory("PolymorphWithGeneChangerRoot");
+    const Polymorph = await ethers.getContractFactory("PolymorphRoot");
     polymorphInstance = await Polymorph.deploy(name, token, baseUri, daoAddress, premintedTokensCount, defaultGenomeChangePrice, polymorphPrice, totalSupply, randomizeGenomePrice, bulkBuyLimit, arweaveAssetsJSON, polymorphV1Address);
     console.log(`polymorph contract deployed to: ${polymorphInstance.address}`);
 

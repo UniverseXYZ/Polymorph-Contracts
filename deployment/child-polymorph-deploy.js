@@ -22,7 +22,7 @@ async function PolymorphDeploy() {
 	const randomizePrice = ethers.utils.parseEther("0.01");
 	const arweaveContainer = "https://arweave.net/5KDDRA5EE9p-Bw29ryB9Uz6SvMRNMCyXKkOzW_ZT9gA";
 
-  const Polymorph = await hre.ethers.getContractFactory("PolymorphWithGeneChangerChild");
+  const Polymorph = await hre.ethers.getContractFactory("PolymorphWithGeneChanger");
   const polymorph = await Polymorph.deploy(
     tokenName, 
     tokenSymbol, 
