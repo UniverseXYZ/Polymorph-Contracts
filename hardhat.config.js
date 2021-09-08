@@ -5,7 +5,8 @@
  require("@nomiclabs/hardhat-etherscan");
  require('hardhat-contract-sizer');
  require('dotenv').config();
- 
+ require("solidity-coverage");
+
   module.exports = {
    solidity: {
      compilers: [
