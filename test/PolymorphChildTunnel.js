@@ -49,7 +49,8 @@ describe('PolymorphChildTunnel', () => {
      expect(await tunnelInstance.polymorphContract()).to.eq(newPolymorphAddress)
   })
 
-  // it('Address that is not dao should not be able to set polymorph contract', async () => {
-  //   await expect(exposedTunnelInstance.setPolymorphContract("0x3d1d3E34f7fB6D26245E6640E1c50710eFFf15bA")).to.be.revertedWith("Not called from the dao");
-  // })
+  it('Address that is not dao should not be able to set polymorph contract', async () => {
+    const [user, alice] = await ethers.getSigners();
+    await expect(exposedTunnelInstance.connect(alice).setPolymorphContract("0x3d1d3E34f7fB6D26245E6640E1c50710eFFf15bA")).to.be.revertedWith("Not called from the dao");
+  });
 })

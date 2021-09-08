@@ -66,6 +66,11 @@ describe('Polymorph Polygon Integration', () => {
     await expect(polymorphInstance.ownerOf(tokenId)).to.be.revertedWith("ERC721: owner query for nonexistent token");
   });
 
+  it('moveThroughWormhole should revert if not called by polymorph owner', async () => {
+    const [user, alice] = await ethers.getSigners();
+    await expect(tunnelInstance.connect(alice).moveThroughWormhole(tokenId)).revertedWith("Only owner can move polymorph");
+  });
+
   it('processMessageFromRoot should mint and update polymoprh info correctly', async() => {
     const [user] = await ethers.getSigners();
     const baseGenomeChangePrice = await polymorphInstance.baseGenomeChangePrice();

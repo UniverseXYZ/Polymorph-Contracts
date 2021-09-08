@@ -25,4 +25,7 @@ describe('PolymorphChild', () => {
   it("mintPolymorphWithInfo should revert if not called from tunnel", async() => {
     await expect(polymorphInstance.mintPolymorphWithInfo(1, "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", 41241412)).to.be.revertedWith("Not called from the tunnel");
   })
+  it("minting should be disabled", async() => {
+    await expect(polymorphInstance.mint("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")).revertedWith("Minting is disabled on side chains");
+  })
 });

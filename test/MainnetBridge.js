@@ -47,6 +47,17 @@ describe('Polymorph Mainnet Integration', () => {
     await expect(exposedTunnelInstance.moveThroughWormhole(tokenId), "").to.be.reverted;
   });
 
+  it('moveThroughWormhole should revert when not called from polymorph owner', async() => {
+    const tokenId = 1;  
+    const [user, alice] = await ethers.getSigners();
+
+    await polymorphInstance.bulkBuy(tokenId, {value: polymorphPrice.mul(tokenId)});
+
+    await polymorphInstance.approve(exposedTunnelInstance.address, tokenId);
+
+    await expect(exposedTunnelInstance.connect(alice).moveThroughWormhole(tokenId), "").revertedWith("Only owner can move polymorph");
+  });
+
   it('moveThroughWormhole should not revert if polymorph has been approved for transfer', async() => {
     const tokenId = 2;  
 
