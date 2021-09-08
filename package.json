@@ -23,6 +23,6 @@
     "ethers": "^5.4.5",
     "hardhat": "^2.6.1",
     "hardhat-contract-sizer": "^2.0.3",
-    "solidity-coverage": "^0.7.17"
+    "solidity-coverage": "^0.7.16"
   }
 }
