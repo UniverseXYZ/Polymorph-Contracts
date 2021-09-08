@@ -4,13 +4,8 @@ pragma solidity ^0.7.0;
 import "../tunnel/FxBaseRootTunnel.sol";
 import "../base/PolymorphTunnel.sol";
 import "./PolymorphRoot.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721Holder.sol";
 
-contract PolymorphRootTunnel is
-    FxBaseRootTunnel,
-    ERC721Holder,
-    PolymorphTunnel
-{
+contract PolymorphRootTunnel is FxBaseRootTunnel, PolymorphTunnel {
     constructor(
         address _checkpointManager,
         address _fxRoot,
@@ -43,13 +38,7 @@ contract PolymorphRootTunnel is
             uint256 genomeChanges
         ) = _decodeMessage(data);
 
-        polymorphContract.approve(ownerAddress, tokenId);
-
-        polymorphContract.safeTransferFrom(
-            address(this),
-            ownerAddress,
-            tokenId
-        );
+        polymorphContract.transferFrom(address(this), ownerAddress, tokenId);
 
         polymorphContract.wormholeUpdateGene(
             tokenId,
@@ -64,7 +53,7 @@ contract PolymorphRootTunnel is
         override
         onlyOwner(tokenId)
     {
-        polymorphContract.safeTransferFrom(msg.sender, address(this), tokenId);
+        polymorphContract.transferFrom(msg.sender, address(this), tokenId);
 
         _sendMessageToChild(
             abi.encode(

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.7.0;
 
-abstract contract DAO {
+abstract contract DAOControlled {
     address payable public daoAddress;
 
     constructor(address payable _daoAddress) {

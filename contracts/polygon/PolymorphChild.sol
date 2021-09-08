@@ -45,7 +45,6 @@ contract PolymorphChild is IPolymorphChild, PolymorphWithGeneChanger {
         uint256 gene
     ) public override nonReentrant onlyTunnel {
         _mint(ownerAddress, tokenId);
-        //TODO: Ask Stan/George if this emit events is ok because after that we will be changing the gene
         emit TokenMinted(tokenId, gene);
     }
 }

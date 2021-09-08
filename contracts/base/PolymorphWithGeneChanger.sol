@@ -4,14 +4,14 @@ pragma solidity ^0.7.0;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "../lib/PolymorphGeneGenerator.sol";
-import "../modifiers/Tunnel.sol";
+import "../modifiers/TunnelEnabled.sol";
 import "./Polymorph.sol";
 import "./IPolymorphWithGeneChanger.sol";
 
 abstract contract PolymorphWithGeneChanger is
     IPolymorphWithGeneChanger,
     Polymorph,
-    Tunnel
+    TunnelEnabled
 {
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
     using SafeMath for uint256;

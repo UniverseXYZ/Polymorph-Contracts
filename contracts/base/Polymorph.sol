@@ -6,13 +6,13 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "../base/ERC721PresetMinterPauserAutoId.sol";
 import "../lib/PolymorphGeneGenerator.sol";
-import "../modifiers/DAO.sol";
+import "../modifiers/DAOControlled.sol";
 
 abstract contract Polymorph is
     IPolymorph,
     ERC721PresetMinterPauserAutoId,
     ReentrancyGuard,
-    DAO
+    DAOControlled
 {
     using Counters for Counters.Counter;
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
@@ -49,7 +49,10 @@ abstract contract Polymorph is
         string memory baseURI,
         address payable _daoAddress,
         string memory _arweaveAssetsJSON
-    ) DAO(_daoAddress) ERC721PresetMinterPauserAutoId(name, symbol, baseURI) {
+    )
+        DAOControlled(_daoAddress)
+        ERC721PresetMinterPauserAutoId(name, symbol, baseURI)
+    {
         arweaveAssetsJSON = _arweaveAssetsJSON;
     }
 
