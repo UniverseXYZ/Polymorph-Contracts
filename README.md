@@ -38,11 +38,13 @@ Gene positions:
 
 ## Polygon bridge
 
-Every polymorph owner has the ability to transfer his polymorph to Polygon using our bridge. This has been implemented in order to save the users the gas fees on mainnet. Transfering polymorphs works in both directions.
+Every polymorph owner has the ability to transfer it's polymorph to Polygon using the Polygon bridge. It implemented in order to save the users the gas fees on mainnet. The bridge works in both directions thanks to [Polygon's StateSync pattern](https://docs.matic.network/docs/develop/l1-l2-communication/state-transfer/).
 
-This is achieved using [Polygon's StateSync pattern](https://docs.matic.network/docs/develop/l1-l2-communication/state-transfer/).
+Moving the polymorh from Ethereum to Polygon will lock the polymorph in the tunnel contract untils it's transfered back to Ethereum. After that the Polygon contract will mint a polymorph with the same tokenId, gene, genomeChnagePrice, virginity information from Ethereum.
 
-Implementations of the polymorph contracts are slightly different on Polygon and Ethereum. On Polygon minting and bulkbuy functionalities are disabled. Polygon contract has a special functio to mint a polymorph with gene, genomeChnagePrice, virginity state from ethereum which isn't possible on the Ethereum contract.
+Moving the polymorph from Polygon to Ethereum will burn the polymorph on Polygon and transfer the ownership of the polymorph back to the owner(trading is supported) as well as any state that has changed.
+
+Separate contracts implementations of the polymorph contracts have been made for each of the networks because they have slight differences.
 
 ### Polymorphs Bridge Flow
 
@@ -105,3 +107,11 @@ Tunnel contract implementation on Ethereum's side. It handles the receiving and 
 ## PolymorphChildTunnel
 
 Tunnel contract implementation on Polygons's side. It handles the receiving and sending messages from the root tunnel on Ethereum
+
+## DAOControlled
+
+Contract which adds a dao field and a modifer to check if the address matches the dao address
+
+## TunnelEnabled
+
+Contract which adds a tunnel mapping of addresses field and a modifer to check if the in address has been whitelisted as a tunnel.
