@@ -40,9 +40,11 @@ Gene positions:
 
 Every polymorph owner has the ability to transfer it's polymorph to Polygon using the Polygon bridge. It implemented in order to save the users the gas fees on mainnet. The bridge works in both directions thanks to [Polygon's StateSync pattern](https://docs.matic.network/docs/develop/l1-l2-communication/state-transfer/).
 
-Moving the polymorh from Ethereum to Polygon will lock the polymorph in the tunnel contract untils it's transfered back to Ethereum. After that the Polygon contract will mint a polymorph with the same tokenId, gene, genomeChnagePrice, virginity information from Ethereum.
+Moving the polymorph from Ethereum to Polygon will lock the polymorph in the tunnel contract untils it's transfered back to Ethereum. After that the Polygon contract will mint a polymorph with the same token id, gene, genome change price and virginity information as on Ethereum.
 
-Moving the polymorph from Polygon to Ethereum will burn the polymorph on Polygon and transfer the ownership of the polymorph back to the owner(trading is supported) as well as any state that has changed.
+The user is then able to have the same functionalities on Polygon without the huge gas fees.
+
+Moving the polymorph from Polygon to Ethereum will burn the polymorph on Polygon and transfer the ownership of the polymorph back to the owner(trading is supported) as well as any state that has changed during that period.
 
 Separate contracts implementations of the polymorph contracts have been made for each of the networks because they have slight differences.
 
