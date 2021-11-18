@@ -11,3 +11,4 @@ cache
 deploy.sh
 jsconfig.json
 hardhat.config.js
+.history

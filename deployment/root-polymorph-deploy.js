@@ -25,9 +25,9 @@ async function PolymorphDeploy() {
 	const randomizePrice = ethers.utils.parseEther("0.01");
 	const bulkBuyLimit = 20
 	const arweaveContainer = "https://arweave.net/5KDDRA5EE9p-Bw29ryB9Uz6SvMRNMCyXKkOzW_ZT9gA";
-	const polymorphV1Address = "0x75D38741878da8520d1Ae6db298A9BD994A5D241";
+	const polymorphV1Address = "0xF3641531e55DB83A39a6d505DfDecA614812F7a0";
 
-  const Polymorph = await hre.ethers.getContractFactory("PolymorphWithGeneChanger");
+  const Polymorph = await hre.ethers.getContractFactory("PolymorphRoot");
   const polymorph = await Polymorph.deploy(
     tokenName, 
     tokenSymbol, 
