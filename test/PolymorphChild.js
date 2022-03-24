@@ -4,6 +4,7 @@ describe('PolymorphChild', () => {
   let polymorphInstance;
 
   before(async () => {
+    const [user, dao, alice, bob] = await ethers.getSigners();
     //Polymorph constructor arguments
     let name = "PolymorphWithGeneChanger";
     let token = "MORPH";
@@ -16,6 +17,7 @@ describe('PolymorphChild', () => {
     const PolymorphChild = await ethers.getContractFactory("PolymorphChild");
     polymorphInstance = await PolymorphChild.deploy(name, token, baseUri, daoAddress, defaultGenomeChangePrice, randomizeGenomePrice, arweaveAssetsJSON);
     console.log(`Polymorph instance deployed to: ${polymorphInstance.address}`);
+
   });
 
   it('wormholeUpdateGene should revert if not called from tunnel', async() => {
@@ -28,4 +30,10 @@ describe('PolymorphChild', () => {
   it("minting should be disabled", async() => {
     await expect(polymorphInstance.mint("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")).revertedWith("Minting is disabled on side chains");
   })
+
+  it("should accept ERC20 as payment method", async() => {
+    
+  })
+
+
 });

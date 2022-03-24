@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 
 import "../base/PolymorphWithGeneChanger.sol";
 import "./IPolymorphChild.sol";
 
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 contract PolymorphChild is IPolymorphChild, PolymorphWithGeneChanger {
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
+
+    IERC20 public maticWETH;
 
     constructor(
         string memory name,
@@ -46,5 +51,84 @@ contract PolymorphChild is IPolymorphChild, PolymorphWithGeneChanger {
     ) public override nonReentrant onlyTunnel {
         _mint(ownerAddress, tokenId);
         emit TokenMinted(tokenId, gene);
+    }
+
+    function setMaticWETHContract(address _maticWETHAddress) public onlyDAO {
+        maticWETH = IERC20(_maticWETHAddress);
+    }
+
+    function morphGene(uint256 tokenId, uint256 genePosition)
+        public
+        payable
+        virtual
+        override
+        nonReentrant
+    {
+        require(genePosition > 0, "Base character not morphable");
+        _beforeGenomeChange(tokenId);
+        uint256 price = priceForGenomeChange(tokenId);
+
+        maticWETH.transferFrom(msg.sender, daoAddress, price);
+
+        // require(
+        //     maticWETH.transferFrom(msg.sender, daoAddress, price),
+        //     "Address: unable to send value, recipient may have reverted"
+        // );
+
+        if (msg.value > 0) {
+            (bool returnExcessStatus, ) = _msgSender().call{
+                value: msg.value
+            }("");
+            require(returnExcessStatus, "Failed to return excess.");
+        }
+
+        uint256 oldGene = _genes[tokenId];
+        uint256 newTrait = geneGenerator.random() % 100;
+        _genes[tokenId] = replaceGene(oldGene, newTrait, genePosition);
+        _genomeChanges[tokenId]++;
+        isNotVirgin[tokenId] = true;
+        emit TokenMorphed(
+            tokenId,
+            oldGene,
+            _genes[tokenId],
+            price,
+            PolymorphEventType.MORPH
+        );
+    }
+
+    function randomizeGenome(uint256 tokenId)
+        public
+        payable
+        virtual
+        override
+        nonReentrant
+    {
+        _beforeGenomeChange(tokenId);
+
+        maticWETH.transferFrom(msg.sender, daoAddress, randomizeGenomePrice);
+
+        // require(
+        //     maticWETH.transferFrom(msg.sender, daoAddress, randomizeGenomePrice),
+        //     "Address: unable to send value, recipient may have reverted"
+        // );
+
+        if (msg.value > 0) {
+            (bool returnExcessStatus, ) = _msgSender().call{
+                value: msg.value
+            }("");
+            require(returnExcessStatus, "Failed to return excess.");
+        }
+
+        uint256 oldGene = _genes[tokenId];
+        _genes[tokenId] = geneGenerator.random();
+        _genomeChanges[tokenId] = 0;
+        isNotVirgin[tokenId] = true;
+        emit TokenMorphed(
+            tokenId,
+            oldGene,
+            _genes[tokenId],
+            randomizeGenomePrice,
+            PolymorphEventType.MORPH
+        );
     }
 }

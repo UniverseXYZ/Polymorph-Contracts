@@ -14,36 +14,46 @@ async function printDeployerInfo() {
 async function PolymorphDeploy() {
   await printDeployerInfo();
 
-	const tokenName = "Polymorph";
-	const tokenSymbol = "MORPH";
-	const metadataURI = "https://us-central1-polymorphmetadata.cloudfunctions.net/images-function?id="
-	const DAOAddress = "0x75D38741878da8520d1Ae6db298A9BD994A5D241"
-	const premint = 0
-	const geneChangePrice = ethers.utils.parseEther("0.01");
-	const polymorphPrice = ethers.utils.parseEther("0.0777");
-	const polymorphsLimit = 10000
-	const randomizePrice = ethers.utils.parseEther("0.01");
-	const bulkBuyLimit = 20
-	const arweaveContainer = "https://arweave.net/5KDDRA5EE9p-Bw29ryB9Uz6SvMRNMCyXKkOzW_ZT9gA";
-	const polymorphV1Address = "0xF3641531e55DB83A39a6d505DfDecA614812F7a0";
+  const tokenName = "Polymorph";
+  const tokenSymbol = "MORPH";
+  const metadataURI =
+    "https://us-central1-polymorphmetadata.cloudfunctions.net/images-function?id=";
+  const DAOAddress = "0x8FcE67537676879Bc5a1B86B403400E1614Bfce6";
+  const premint = 0;
+  const geneChangePrice = ethers.utils.parseEther("0.001");
+  const polymorphPrice = ethers.utils.parseEther("0.00777");
+  const polymorphsLimit = 10000;
+  const randomizePrice = ethers.utils.parseEther("0.001");
+  const bulkBuyLimit = 20;
+  const arweaveContainer =
+    "https://arweave.net/5KDDRA5EE9p-Bw29ryB9Uz6SvMRNMCyXKkOzW_ZT9gA";
+  const polymorphV1Address = "0xF3641531e55DB83A39a6d505DfDecA614812F7a0";
+
+  const constructorArgs = {
+    name: tokenName,
+    symbol: tokenSymbol,
+    baseURI: metadataURI,
+    _daoAddress: DAOAddress,
+    premintedTokensCount: premint,
+    _baseGenomeChangePrice: geneChangePrice,
+    _polymorphPrice: polymorphPrice,
+    _maxSupply: polymorphsLimit,
+    _randomizeGenomePrice: randomizePrice,
+    _bulkBuyLimit: bulkBuyLimit,
+    _arweaveAssetsJSON: arweaveContainer,
+    _polymorphV1Address: polymorphV1Address,
+  };
 
   const Polymorph = await hre.ethers.getContractFactory("PolymorphRoot");
-  const polymorph = await Polymorph.deploy(
-    tokenName, 
-    tokenSymbol, 
-    metadataURI, 
-    DAOAddress, 
-    premint, 
-    geneChangePrice, 
-    polymorphPrice, 
-    polymorphsLimit, 
-    randomizePrice, 
-    bulkBuyLimit, 
-    arweaveContainer,
-    polymorphV1Address
-  );
+  const polymorph = await Polymorph.deploy(constructorArgs);
 
   await polymorph.deployed();
+
+  await hre.tenderly.persistArtifacts({
+    name: "PolymorphRoot",
+    address: polymorph.address,
+  });
+
   console.log(`Polymorph address: ${polymorph.address}`);
 }
 

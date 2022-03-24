@@ -117,3 +117,36 @@ Contract which adds a dao field and a modifer to check if the address matches th
 ## TunnelEnabled
 
 Contract which adds a tunnel mapping of addresses field and a modifer to check if the in address has been whitelisted as a tunnel.
+
+## Polygon Bridge Functionality
+- Polymorphs NFT Collection support bridging a token to the Polygon network with the goal of morphing a gene / randomizing a genome with much lower transaction fees. 
+- For a detailed step-by-step explanation of how the Polygon Bridge works with the Polymorph Contracts, check `notebooks/Polygon-Bridge-Steps`
+
+## Contracts deployment
+- PolymorphRoot
+  - `npx hardhat run deployment/root-polymorph-deploy.js --network goerli`
+- PolymorphRootTunnel
+  - `npx hardhat run deployment/root-tunnel-deploy.js --network goerli`
+- PolymorphChild
+  - `npx hardhat run deployment/child-polymorph-deploy.js --network mumbai`
+- PolymorphChildTunnel
+  - `npx hardhat run deployment/child-tunnel-deploy.js --network mumbai`
+- TestERC20 (Needed for morphing a gene on Polygon)
+  - `npx hardhat run deployment/test-erc20-deploy.js --network mumbai`
+
+## Etherscan verification
+
+- Polymorph Root Verification:
+    - `npx hardhat verify --network goerli contractAddress --constructor-args ./deployment/args/root-polymorph-args.js`
+
+- RootTunnel Verification:
+    - `npx hardhat verify --network goerli <contractAddress> <"checkPointAddress"> <"fxRootAddress"> <"daoAddress">`
+
+- Polymorph Child Verification:
+    - `npx hardhat verify --network mumbai <contractAddress> --constructor-args ./deployment/args/child-polymorph-args.js`
+   
+- ChildTunnel Verification:
+    - `npx hardhat verify --network mumbai <contractAddress> <"fxChildAddress"> <"daoAddress">`
+
+- TestERC20 Verification:
+  - `npx hardhat verify --network mumbai --contract contracts/polygon/TestERC20.sol:TestERC20 <contractAddress>`

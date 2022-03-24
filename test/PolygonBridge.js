@@ -1,7 +1,8 @@
 const { expect } = require("chai");
+const { ethers } = require("hardhat");
 
 describe('Polymorph Polygon Integration', () => {
-  let tunnelInstance, exposedTunnelInstance, polymorphInstance;
+  let tunnelInstance, exposedTunnelInstance, polymorphInstance, wethInstance;
   //Tunnel contrustor arguments
   const goerliFxChild = "0xCf73231F28B7331BBe3124B907840A94851f9f11";
 
@@ -33,11 +34,19 @@ describe('Polymorph Polygon Integration', () => {
     polymorphInstance = await Polymorph.deploy(name, token, baseUri, daoAddress, defaultGenomeChangePrice, randomizeGenomePrice, arweaveAssetsJSON);
     console.log(`polymorph contract deployed to: ${polymorphInstance.address}`);
 
+    const TestERC20 = await ethers.getContractFactory("TestERC20");
+    wethInstance = await TestERC20.deploy();
+    console.log(`Test WETH contract deployed to: ${wethInstance.address}`);
+
     await tunnelInstance.setPolymorphContract(polymorphInstance.address);
     await exposedTunnelInstance.setPolymorphContract(polymorphInstance.address);
 
     polymorphInstance.whitelistBridgeAddress(exposedTunnelInstance.address, true);
+
+    await polymorphInstance.setMATICWethContract(wethInstance.address);
+
   });
+
   beforeEach(async() => {
     tokenId++;
 
@@ -48,9 +57,37 @@ describe('Polymorph Polygon Integration', () => {
       [tokenId, user.address, newGene, newVirginity, newChangesCount]
     );
 
+    const approveAmount = 3000000000000000000;
+
     await exposedTunnelInstance.exposedProcessMessageFromRoot(1, user.address, keccak);
 
+    await wethInstance.approve(user.address, polymorphInstance.address, approveAmount);
   })
+
+  it('morphGene should tax WETH Token for morphing a gene', async() => {
+    const morphGenePrice = await polymorphInstance.priceForGenomeChange(tokenId);
+    const genePos = 5;
+
+    const currentGene = await polymorphInstance.geneOf(tokenId);
+
+    await expect(polymorphInstance.morphGene(tokenId, genePos, {value: morphGenePrice})).to.not.be.reverted;
+
+    const morphedGene = await polymorphInstance.geneOf(tokenId);
+
+    await expect(currentGene).to.not.equal(morphedGene);
+  });
+
+  it('randomizeGenome should tax WETH Token for randomizing a gene', async() => {
+
+    const currentGene = await polymorphInstance.geneOf(genePos);
+
+    await expect(polymorphInstance.randomizeGenome(tokenId, {value: randomizeGenomePrice})).to.not.be.reverted;
+
+    const randomizedGenome = await polymorphInstance.geneOf(tokenId);
+
+    await expect(currentGene).to.not.equal(morphedGene);
+  });
+
   it('moveThroughWormhole should revert if polymorph has not been approved for transfer', async() => {
     await expect(tunnelInstance.moveThroughWormhole(tokenId)).to.be.revertedWith("ERC721Burnable: caller is not owner nor approved");
   });

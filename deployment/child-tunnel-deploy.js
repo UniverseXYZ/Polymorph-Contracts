@@ -9,7 +9,6 @@ async function printDeployerInfo() {
   const [deployer] = await ethers.getSigners();
   console.log("Deploying contracts with the account:", deployer.address);
   console.log("Account balance:", (await deployer.getBalance()).toString());
-
 }
 
 async function childTunnelDeploy() {
@@ -17,16 +16,22 @@ async function childTunnelDeploy() {
 
   const mumbaiFxChild = "0xCf73231F28B7331BBe3124B907840A94851f9f11";
   //TODO: My wallet address. Change this when we have real dao address
-  const daoAddress = "0x75D38741878da8520d1Ae6db298A9BD994A5D241";
+  const daoAddress = "0x8FcE67537676879Bc5a1B86B403400E1614Bfce6";
 
-  const ChildTunnel = await hre.ethers.getContractFactory("PolymorphChildTunnel");
+  const ChildTunnel = await hre.ethers.getContractFactory(
+    "PolymorphChildTunnel"
+  );
   const childTunnel = await ChildTunnel.deploy(mumbaiFxChild, daoAddress);
 
   await childTunnel.deployed();
 
+  await hre.tenderly.persistArtifacts({
+    name: "PolymorphChildTunnel",
+    address: childTunnel.address,
+  });
+
   console.log(`Child tunnel address: ${childTunnel.address}`);
 }
-
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.

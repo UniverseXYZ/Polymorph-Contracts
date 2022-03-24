@@ -14,26 +14,33 @@ async function printDeployerInfo() {
 async function PolymorphDeploy() {
   await printDeployerInfo();
 
-	const tokenName = "Polymorph";
-	const tokenSymbol = "MORPH";
-	const metadataURI = "https://us-central1-polymorphmetadata.cloudfunctions.net/images-function?id="
-	const DAOAddress = "0x75D38741878da8520d1Ae6db298A9BD994A5D241"
-	const geneChangePrice = ethers.utils.parseEther("0.01");
-	const randomizePrice = ethers.utils.parseEther("0.01");
-	const arweaveContainer = "https://arweave.net/5KDDRA5EE9p-Bw29ryB9Uz6SvMRNMCyXKkOzW_ZT9gA";
+  const tokenName = "Polymorph";
+  const tokenSymbol = "MORPH";
+  const metadataURI =
+    "https://us-central1-polymorphmetadata.cloudfunctions.net/images-function?id=";
+  const DAOAddress = "0x8FcE67537676879Bc5a1B86B403400E1614Bfce6";
+  const geneChangePrice = ethers.utils.parseEther("0.001");
+  const randomizePrice = ethers.utils.parseEther("0.001");
+  const arweaveContainer =
+    "https://arweave.net/5KDDRA5EE9p-Bw29ryB9Uz6SvMRNMCyXKkOzW_ZT9gA";
 
-  const Polymorph = await hre.ethers.getContractFactory("PolymorphWithGeneChanger");
+  const Polymorph = await hre.ethers.getContractFactory("PolymorphChild");
   const polymorph = await Polymorph.deploy(
-    tokenName, 
-    tokenSymbol, 
-    metadataURI, 
-    DAOAddress, 
-    geneChangePrice, 
-    randomizePrice, 
-    arweaveContainer,
+    tokenName,
+    tokenSymbol,
+    metadataURI,
+    DAOAddress,
+    geneChangePrice,
+    randomizePrice,
+    arweaveContainer
   );
 
   await polymorph.deployed();
+
+  await hre.tenderly.persistArtifacts({
+    name: "PolymorphChild",
+    address: polymorph.address,
+  });
   console.log(`Polymorph address: ${polymorph.address}`);
 }
 
