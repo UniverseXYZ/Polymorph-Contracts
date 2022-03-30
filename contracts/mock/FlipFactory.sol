@@ -9,7 +9,7 @@ import "hardhat/console.sol";
 
 contract FlipFactory is ERC721Holder {
     bytes internal _bytecode;
-    PolymorphRoot polymorph;
+    PolymorphRoot polymorph = PolymorphRoot(payable(0x273c507D8E21cDE039491B14647Fe9278D88e91D)); // Ropsten Contract;
 
     constructor() {}
 

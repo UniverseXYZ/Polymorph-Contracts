@@ -54,7 +54,7 @@
       accounts: [process.env.PRIVATE_KEY]
     },
     mumbai: {
-       url: "https://polygon-mumbai.g.alchemy.com/v2/vJeprvW21K9qAMvlYrqkbtiHUoVQA1Ts",
+       url: `https://polygon-mumbai.g.alchemy.com/v2/${MUMBAI_ALCHEMY_KEY}`,
        accounts: [process.env.PRIVATE_KEY],
      },
    },
