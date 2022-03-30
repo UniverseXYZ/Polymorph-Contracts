@@ -2,7 +2,37 @@
 
 ## Overview
 
-The goal of the system is to create NFTs that can change their form (genome). The changes need to be random, or as random as allowed by the on chain execution. The generation of the Polymorphs will be done via contract and the price for single NFT creation will be flat. In addition the holder of a polymorph can choose to pay to randomly mutate a single gene. This price for a single gene mutation is doubled after morph starting at a minimum cost. Every user can randomize their polymorph reseting their genome change cost to the base cost.
+**The goal of the system is to create NFTs that can change their form (genome). The changes need to be random, or as random as allowed by the on chain execution. The generation of the Polymorphs will be done via contract and the price for single NFT creation will be flat. In addition the holder of a polymorph can choose to pay to randomly mutate a single gene. This price for a single gene mutation is doubled after morph starting at a minimum cost. Every user can randomize their polymorph reseting their genome change cost to the base cost.**
+
+## Setup
+### Contracts deployment
+- PolymorphRoot
+  - `npx hardhat run deployment/root-polymorph-deploy.js --network goerli`
+- PolymorphRootTunnel
+  - `npx hardhat run deployment/root-tunnel-deploy.js --network goerli`
+- PolymorphChild
+  - `npx hardhat run deployment/child-polymorph-deploy.js --network mumbai`
+- PolymorphChildTunnel
+  - `npx hardhat run deployment/child-tunnel-deploy.js --network mumbai`
+- TestERC20 (Needed for morphing a gene on Polygon)
+  - `npx hardhat run deployment/test-erc20-deploy.js --network mumbai`
+
+### Etherscan verification
+
+- Polymorph Root Verification:
+    - `npx hardhat verify --network goerli contractAddress --constructor-args ./deployment/args/root-polymorph-args.js`
+
+- RootTunnel Verification:
+    - `npx hardhat verify --network goerli <contractAddress> <"checkPointAddress"> <"fxRootAddress"> <"daoAddress">`
+
+- Polymorph Child Verification:
+    - `npx hardhat verify --network mumbai <contractAddress> --constructor-args ./deployment/args/child-polymorph-args.js`
+   
+- ChildTunnel Verification:
+    - `npx hardhat verify --network mumbai <contractAddress> <"fxChildAddress"> <"daoAddress">`
+
+- TestERC20 Verification:
+  - `npx hardhat verify --network mumbai --contract contracts/polygon/TestERC20.sol:TestERC20 <contractAddress>`
 
 ## Genome
 
@@ -36,17 +66,19 @@ Gene positions:
 - 7 - right weapon attribute
 - 8 - left weapon attribute
 
-## Polygon bridge
+## Polygon Bridge
 
 Every polymorph owner has the ability to transfer it's polymorph to Polygon using the Polygon bridge. It implemented in order to save the users the gas fees on mainnet. The bridge works in both directions thanks to [Polygon's StateSync pattern](https://docs.matic.network/docs/develop/l1-l2-communication/state-transfer/).
 
-Moving the polymorph from Ethereum to Polygon will lock the polymorph in the tunnel contract untils it's transfered back to Ethereum. After that the Polygon contract will mint a polymorph with the same token id, gene, genome change price and virginity information as on Ethereum.
+- Moving the polymorph from Ethereum to Polygon will lock the polymorph in the tunnel contract until it's transfered back to Ethereum. After that the Polygon contract will mint a polymorph with the same token id, gene, genome change price and virginity information as on Ethereum.
 
-The user is then able to have the same functionalities on Polygon without the huge gas fees.
+- The user is then able to have the same functionalities on Polygon without the huge gas fees.
 
-Moving the polymorph from Polygon to Ethereum will burn the polymorph on Polygon and transfer the ownership of the polymorph back to the owner(trading is supported) as well as any state that has changed during that period.
+- Moving the polymorph from Polygon to Ethereum will burn the polymorph on Polygon and transfer the ownership of the polymorph back to the owner(trading is supported) as well as any state that has changed during that period.
 
-Separate contracts implementations of the polymorph contracts have been made for each of the networks because they have slight differences.
+- Separate contracts implementations of the polymorph contracts have been made for each of the networks because they have slight differences.
+
+- **For a detailed step-by-step explanation and showcase of each transcation of how the Polygon Bridge works with the Polymorph Contracts, check `notebooks/Polygon-Bridge-Steps`**
 
 ### Polymorphs Bridge Flow
 
@@ -60,93 +92,60 @@ Separate contracts implementations of the polymorph contracts have been made for
 
 ![Polygon to Ethereum Bridge Flow](https://github.com/UniverseXYZ/Polymorph-Contracts/blob/polymorph-v2-polygon-bridge/diagrams/PolymorphToEthereumTransfer.png "Polygon to Ethereum Bridge Flow")
 
-# Contracts
+## Contracts Description
 
-## Hierarchy
+### Hierarchy
 
 ![Contracts Hierarchy](https://github.com/UniverseXYZ/Polymorph-Contracts/blob/polymorph-v2-polygon-bridge/diagrams/PolymorphsBridge.png "Contracts Hierarchy")
 
-## ERC721PresetMinterPauserAutoId
+### ERC721PresetMinterPauserAutoId
 
 Standard OZ one with changed visibility modifier for the token counter
 
-## PolymorphGeneGenerator
+### PolymorphGeneGenerator
 
 The library used for randomness generation.
 
-## Polymorph
+### Polymorph
 
 The base abstract contract acting as an ERC721 but also carrying the gene generation and gene state logic.
 
-## PolymorphWithGeneChanger
+### PolymorphWithGeneChanger
 
 Abstract contract extending the Polymorph contract enabling gene mutation and updating gene when transfering polymorph from another network(Polygon).
 
-## PolymorphRoot
+### PolymorphRoot
 
 The main contract on Ethereum's side. It enables pre-minting, minting, bulk buying and burning V1 polymorphs.
 
-## PolymorphChild
+### PolymorphChild
 
 The main contract on other networks's (Polygon) side. It enables minting with predefined token id.
 
-## FxBaseChildTunnel
+### FxBaseChildTunnel
 
 Polygon contract implementation which enables the ability to transfer state(polymorphs and their data) to Ethereum.
 
-## FxBaseRootTunnel
+### FxBaseRootTunnel
 
 Ethereum contract implementation enables the ability to transfer state(polymorphs and their data) to Polygon.
 
-## PolymorphTunnel
+### PolymorphTunnel
 
 Base abstract contract implementation. It handles the decoding of messages send via the tunnels.
 
-## PolymorphRootTunnel
+### PolymorphRootTunnel
 
 Tunnel contract implementation on Ethereum's side. It handles the receiving and sending messages from the child tunnel on polygon
 
-## PolymorphChildTunnel
+### PolymorphChildTunnel
 
 Tunnel contract implementation on Polygons's side. It handles the receiving and sending messages from the root tunnel on Ethereum
 
-## DAOControlled
+### DAOControlled
 
 Contract which adds a dao field and a modifer to check if the address matches the dao address
 
-## TunnelEnabled
+### TunnelEnabled
 
 Contract which adds a tunnel mapping of addresses field and a modifer to check if the in address has been whitelisted as a tunnel.
-
-## Polygon Bridge Functionality
-- Polymorphs NFT Collection support bridging a token to the Polygon network with the goal of morphing a gene / randomizing a genome with much lower transaction fees. 
-- For a detailed step-by-step explanation of how the Polygon Bridge works with the Polymorph Contracts, check `notebooks/Polygon-Bridge-Steps`
-
-## Contracts deployment
-- PolymorphRoot
-  - `npx hardhat run deployment/root-polymorph-deploy.js --network goerli`
-- PolymorphRootTunnel
-  - `npx hardhat run deployment/root-tunnel-deploy.js --network goerli`
-- PolymorphChild
-  - `npx hardhat run deployment/child-polymorph-deploy.js --network mumbai`
-- PolymorphChildTunnel
-  - `npx hardhat run deployment/child-tunnel-deploy.js --network mumbai`
-- TestERC20 (Needed for morphing a gene on Polygon)
-  - `npx hardhat run deployment/test-erc20-deploy.js --network mumbai`
-
-## Etherscan verification
-
-- Polymorph Root Verification:
-    - `npx hardhat verify --network goerli contractAddress --constructor-args ./deployment/args/root-polymorph-args.js`
-
-- RootTunnel Verification:
-    - `npx hardhat verify --network goerli <contractAddress> <"checkPointAddress"> <"fxRootAddress"> <"daoAddress">`
-
-- Polymorph Child Verification:
-    - `npx hardhat verify --network mumbai <contractAddress> --constructor-args ./deployment/args/child-polymorph-args.js`
-   
-- ChildTunnel Verification:
-    - `npx hardhat verify --network mumbai <contractAddress> <"fxChildAddress"> <"daoAddress">`
-
-- TestERC20 Verification:
-  - `npx hardhat verify --network mumbai --contract contracts/polygon/TestERC20.sol:TestERC20 <contractAddress>`

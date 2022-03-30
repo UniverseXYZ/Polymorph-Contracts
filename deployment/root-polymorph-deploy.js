@@ -27,7 +27,7 @@ async function PolymorphDeploy() {
   const bulkBuyLimit = 20;
   const arweaveContainer =
     "https://arweave.net/5KDDRA5EE9p-Bw29ryB9Uz6SvMRNMCyXKkOzW_ZT9gA";
-  const polymorphV1Address = "0xF3641531e55DB83A39a6d505DfDecA614812F7a0";
+  const polymorphV1Address = "0x2b081b53777aF7Ca3A331dC419C4F446Cb00bAfC";
 
   const constructorArgs = {
     name: tokenName,

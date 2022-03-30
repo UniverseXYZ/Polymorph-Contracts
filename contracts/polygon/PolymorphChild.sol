@@ -68,12 +68,10 @@ contract PolymorphChild is IPolymorphChild, PolymorphWithGeneChanger {
         _beforeGenomeChange(tokenId);
         uint256 price = priceForGenomeChange(tokenId);
 
-        maticWETH.transferFrom(msg.sender, daoAddress, price);
-
-        // require(
-        //     maticWETH.transferFrom(msg.sender, daoAddress, price),
-        //     "Address: unable to send value, recipient may have reverted"
-        // );
+        require(
+            maticWETH.transferFrom(msg.sender, daoAddress, price),
+            "Address: unable to send value, recipient may have reverted"
+        );
 
         if (msg.value > 0) {
             (bool returnExcessStatus, ) = _msgSender().call{
@@ -105,12 +103,10 @@ contract PolymorphChild is IPolymorphChild, PolymorphWithGeneChanger {
     {
         _beforeGenomeChange(tokenId);
 
-        maticWETH.transferFrom(msg.sender, daoAddress, randomizeGenomePrice);
-
-        // require(
-        //     maticWETH.transferFrom(msg.sender, daoAddress, randomizeGenomePrice),
-        //     "Address: unable to send value, recipient may have reverted"
-        // );
+        require(
+            maticWETH.transferFrom(msg.sender, daoAddress, randomizeGenomePrice),
+            "Address: unable to send value, recipient may have reverted"
+        );
 
         if (msg.value > 0) {
             (bool returnExcessStatus, ) = _msgSender().call{

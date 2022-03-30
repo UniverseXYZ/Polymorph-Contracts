@@ -9,7 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@fxportal/maticjs-fxportal": "^1.1.1",
     "@maticnetwork/maticjs": "^3.2.4",
     "@maticnetwork/maticjs-ethers": "^1.0.1",
     "@openzeppelin/contracts": "^4.5.0",

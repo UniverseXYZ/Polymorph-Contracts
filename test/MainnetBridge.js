@@ -13,12 +13,14 @@ describe('Polymorph Mainnet Integration', () => {
   let polymorphV1Address = "0x75D38741878da8520d1Ae6db298A9BD994A5D241";
   let daoAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
   let defaultGenomeChangePrice = ethers.utils.parseEther("0.01");
-  let premintedTokensCount = 5;
+  let premintedTokensCount = 0;
   let polymorphPrice = ethers.utils.parseEther("0.0777");
   let totalSupply = 30;
   let randomizeGenomePrice = ethers.utils.parseEther("0.01");
   let bulkBuyLimit = 20;
   let arweaveAssetsJSON = 'JSON'
+
+  let tokenId = 0;
 
   const constructorArgs = {
     name: tokenName,
@@ -54,16 +56,18 @@ describe('Polymorph Mainnet Integration', () => {
     polymorphInstance.whitelistBridgeAddress(exposedTunnelInstance.address, true);
   });
 
+  beforeEach(async () => {
+    tokenId++;
+  });
+
   it('moveThroughWormhole should revert if polymorph has not been approved for transfer', async() => {
-    const tokenId = 1;  
     
     await polymorphInstance.bulkBuy(tokenId, {value: polymorphPrice.mul(tokenId)});
 
     await expect(exposedTunnelInstance.moveThroughWormhole(tokenId), "").to.be.reverted;
   });
 
-  it('moveThroughWormhole should revert when not called from polymorph owner', async() => {
-    const tokenId = 1;  
+  it('moveThroughWormhole should revert when not called from polymorph owner', async() => {  
     const [user, alice] = await ethers.getSigners();
 
     await polymorphInstance.bulkBuy(tokenId, {value: polymorphPrice.mul(tokenId)});
@@ -74,7 +78,6 @@ describe('Polymorph Mainnet Integration', () => {
   });
 
   it('moveThroughWormhole should not revert if polymorph has been approved for transfer', async() => {
-    const tokenId = 2;  
 
     await polymorphInstance.bulkBuy(tokenId, {value: polymorphPrice.mul(tokenId)});
 
@@ -84,7 +87,6 @@ describe('Polymorph Mainnet Integration', () => {
   });
 
   it('Should take polymorph from owner and lock it in bridge', async () => {
-    const tokenId = 3;
     const [user] = await ethers.getSigners();
     console.log(`My address: ${user.address}`);
   
@@ -105,22 +107,21 @@ describe('Polymorph Mainnet Integration', () => {
   });
 
   it('Should revert after trying to operate with a locked Token', async () => {
-    const tokenId = 3;
     const [user] = await ethers.getSigners();
     console.log(`My address: ${user.address}`);
   
     await polymorphInstance.bulkBuy(tokenId, {value: polymorphPrice.mul(tokenId)});
 
-    //Assert owner after minting
+    // Assert owner after minting
     let polymorphOwner = await polymorphInstance.ownerOf(tokenId);
     expect(polymorphOwner).eq(user.address);
 
-    //Approve transfering of nft
+    // Approve transfering of nft
     await polymorphInstance.approve(exposedTunnelInstance.address, tokenId);
 
     await exposedTunnelInstance.moveThroughWormhole(tokenId);
 
-    //Assert owner after moving thourgh wormhole
+    // Assert owner after moving through wormhole
     polymorphOwner = await polymorphInstance.ownerOf(tokenId);
     expect(polymorphOwner).eq(exposedTunnelInstance.address);
 
@@ -133,7 +134,6 @@ describe('Polymorph Mainnet Integration', () => {
   });
 
   it('Should return ownership of polymorph', async() => {
-    const tokenId = 4;
     const [user] = await ethers.getSigners();
     console.log(`My address: ${user.address}`);
     
@@ -158,7 +158,6 @@ describe('Polymorph Mainnet Integration', () => {
   });
 
   it('Should update polymoprh info correctly', async() => {
-    const tokenId = 5;
     const [user] = await ethers.getSigners();
     console.log(`My address: ${user.address}`);
   

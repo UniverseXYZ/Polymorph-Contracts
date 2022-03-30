@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
+import "./ERC721Consumable.sol";
 
 /**
  * @dev {ERC721} token, including:
@@ -27,6 +28,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
 contract ERC721PresetMinterPauserAutoId is
     Context,
     AccessControlEnumerable,
+    ERC721Consumable,
     ERC721Enumerable,
     ERC721Burnable,
     ERC721Pausable
@@ -124,7 +126,7 @@ contract ERC721PresetMinterPauserAutoId is
         address from,
         address to,
         uint256 tokenId
-    ) internal virtual override(ERC721, ERC721Enumerable, ERC721Pausable) {
+    ) internal virtual override(ERC721, ERC721Consumable, ERC721Enumerable, ERC721Pausable) {
         super._beforeTokenTransfer(from, to, tokenId);
     }
 
@@ -135,7 +137,7 @@ contract ERC721PresetMinterPauserAutoId is
         public
         view
         virtual
-        override(AccessControlEnumerable, ERC721, ERC721Enumerable)
+        override(AccessControlEnumerable, ERC721, ERC721Consumable, ERC721Enumerable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

@@ -4,7 +4,8 @@ pragma solidity ^0.8.0;
 import "../mainnet/PolymorphRoot.sol";
 
 contract Flip {
-    PolymorphRoot polymorph;
+    PolymorphRoot constant polymorph =
+        PolymorphRoot(payable(0x273c507D8E21cDE039491B14647Fe9278D88e91D)); // Ropsten Contract
 
     constructor(
         uint256 tokenId,
