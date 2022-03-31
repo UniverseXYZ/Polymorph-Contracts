@@ -2,29 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-// import "@openzeppelin/contracts/utils/Counters.sol";
 import "./IERC721Consumable.sol";
 
 abstract contract ERC721Consumable is IERC721Consumable, ERC721 {
-    // Mintable
-    //using Counters for Counters.Counter;
-    //Counters.Counter private _tokenIds;
 
     // Mapping from token ID to consumer address
     mapping(uint256 => address) _tokenConsumers;
-
-    // // Do we need constructor and mint ?
-    // constructor() ERC721("ReferenceImpl", "RIMPL") {
-    // }
-
-    // // @notice Mints new NFT to msg.sender
-    // function mint() external returns (uint256) {
-    //     _tokenIds.increment();
-    //     uint256 newItemId = _tokenIds.current();
-    //     _mint(msg.sender, newItemId);
-
-    //     return newItemId;
-    // }
 
     /**
      * @dev See {IERC721Consumable-consumerOf}

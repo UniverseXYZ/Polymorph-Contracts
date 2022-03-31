@@ -5,11 +5,10 @@ import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/utils/Create2.sol";
 import "../mainnet/PolymorphRoot.sol";
 
-import "hardhat/console.sol";
-
 contract FlipFactory is ERC721Holder {
     bytes internal _bytecode;
-    PolymorphRoot polymorph = PolymorphRoot(payable(0x273c507D8E21cDE039491B14647Fe9278D88e91D)); // Ropsten Contract;
+    PolymorphRoot polymorph =
+        PolymorphRoot(payable(0x273c507D8E21cDE039491B14647Fe9278D88e91D)); // Ropsten Contract;
 
     constructor() {}
 
