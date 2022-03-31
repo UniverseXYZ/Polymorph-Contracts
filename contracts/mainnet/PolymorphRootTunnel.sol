@@ -5,8 +5,6 @@ import "../tunnel/FxBaseRootTunnel.sol";
 import "../base/PolymorphTunnel.sol";
 import "./PolymorphRoot.sol";
 
-import "hardhat/console.sol";
-
 contract PolymorphRootTunnel is FxBaseRootTunnel, PolymorphTunnel {
     constructor(
         address _checkpointManager,
@@ -41,7 +39,7 @@ contract PolymorphRootTunnel is FxBaseRootTunnel, PolymorphTunnel {
         ) = _decodeMessage(data);
 
         polymorphContract.transferFrom(address(this), ownerAddress, tokenId);
-        
+
         polymorphContract.wormholeUpdateGene(
             tokenId,
             gene,

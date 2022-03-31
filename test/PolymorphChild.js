@@ -12,10 +12,14 @@ describe('PolymorphChild', () => {
     let daoAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
     let defaultGenomeChangePrice = ethers.utils.parseEther("0.01");
     let randomizeGenomePrice = ethers.utils.parseEther("0.01");
-    let arweaveAssetsJSON = 'JSON'
+    let arweaveAssetsJSON = 'JSON';
+
+    const TestERC20 = await ethers.getContractFactory("TestERC20");
+    wethInstance = await TestERC20.deploy(); // we want DAO address != who deployed WETH on Polygon
+    console.log(`Test WETH contract deployed to: ${wethInstance.address}`);
 
     const PolymorphChild = await ethers.getContractFactory("PolymorphChild");
-    polymorphInstance = await PolymorphChild.deploy(name, token, baseUri, daoAddress, defaultGenomeChangePrice, randomizeGenomePrice, arweaveAssetsJSON);
+    polymorphInstance = await PolymorphChild.deploy(name, token, baseUri, daoAddress, wethInstance.address, defaultGenomeChangePrice, randomizeGenomePrice, arweaveAssetsJSON);
     console.log(`Polymorph instance deployed to: ${polymorphInstance.address}`);
 
   });

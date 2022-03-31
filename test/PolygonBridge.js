@@ -47,21 +47,22 @@ describe("Polymorph Polygon Integration", () => {
 
     const [user, alice, bob, satoshi] = await ethers.getSigners();
 
+    const TestERC20 = await ethers.getContractFactory("TestERC20");
+    wethInstance = await TestERC20.connect(alice).deploy(); // we want DAO address != who deployed WETH on Polygon
+    console.log(`Test WETH contract deployed to: ${wethInstance.address}`);
+
     const Polymorph = await ethers.getContractFactory("PolymorphChild");
     polymorphInstance = await Polymorph.deploy(
       name,
       token,
       baseUri,
       daoAddress,
+      wethInstance.address,
       defaultGenomeChangePrice,
       randomizeGenomePrice,
       arweaveAssetsJSON
     );
     console.log(`polymorph contract deployed to: ${polymorphInstance.address}`);
-
-    const TestERC20 = await ethers.getContractFactory("TestERC20");
-    wethInstance = await TestERC20.connect(alice).deploy(); // we want DAO address != who deployed WETH on Polygon
-    console.log(`Test WETH contract deployed to: ${wethInstance.address}`);
 
     const bobMintAmount = "6000000000000000000";
     await wethInstance.connect(alice).mint(bob.address, bobMintAmount);

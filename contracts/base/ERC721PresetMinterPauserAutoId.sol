@@ -70,7 +70,7 @@ contract ERC721PresetMinterPauserAutoId is
         return _baseTokenURI;
     }
 
-    function baseURI() external view virtual  returns (string memory) {
+    function baseURI() external view virtual returns (string memory) {
         return _baseURI();
     }
 
@@ -86,7 +86,10 @@ contract ERC721PresetMinterPauserAutoId is
      * - the caller must have the `MINTER_ROLE`.
      */
     function mint(address to) public virtual {
-        require(hasRole(MINTER_ROLE, _msgSender()), "ERC721PresetMinterPauserAutoId: must have minter role to mint");
+        require(
+            hasRole(MINTER_ROLE, _msgSender()),
+            "ERC721PresetMinterPauserAutoId: must have minter role to mint"
+        );
 
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
@@ -104,7 +107,10 @@ contract ERC721PresetMinterPauserAutoId is
      * - the caller must have the `PAUSER_ROLE`.
      */
     function pause() public virtual {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "ERC721PresetMinterPauserAutoId: must have pauser role to pause");
+        require(
+            hasRole(PAUSER_ROLE, _msgSender()),
+            "ERC721PresetMinterPauserAutoId: must have pauser role to pause"
+        );
         _pause();
     }
 
@@ -118,7 +124,10 @@ contract ERC721PresetMinterPauserAutoId is
      * - the caller must have the `PAUSER_ROLE`.
      */
     function unpause() public virtual {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "ERC721PresetMinterPauserAutoId: must have pauser role to unpause");
+        require(
+            hasRole(PAUSER_ROLE, _msgSender()),
+            "ERC721PresetMinterPauserAutoId: must have pauser role to unpause"
+        );
         _unpause();
     }
 
@@ -126,7 +135,11 @@ contract ERC721PresetMinterPauserAutoId is
         address from,
         address to,
         uint256 tokenId
-    ) internal virtual override(ERC721, ERC721Consumable, ERC721Enumerable, ERC721Pausable) {
+    )
+        internal
+        virtual
+        override(ERC721, ERC721Consumable, ERC721Enumerable, ERC721Pausable)
+    {
         super._beforeTokenTransfer(from, to, tokenId);
     }
 
@@ -137,7 +150,12 @@ contract ERC721PresetMinterPauserAutoId is
         public
         view
         virtual
-        override(AccessControlEnumerable, ERC721, ERC721Consumable, ERC721Enumerable)
+        override(
+            AccessControlEnumerable,
+            ERC721,
+            ERC721Consumable,
+            ERC721Enumerable
+        )
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

@@ -8,7 +8,7 @@ interface IFxMessageProcessor {
         address rootMessageSender,
         bytes calldata data
     ) external;
-} 
+}
 
 /**
  * @notice Mock child tunnel contract to receive and send message from L2

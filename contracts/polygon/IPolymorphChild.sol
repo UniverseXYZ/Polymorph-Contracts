@@ -9,4 +9,6 @@ interface IPolymorphChild is IERC721 {
         address ownerAddress,
         uint256 gene
     ) external;
+
+    function setMaticWETHContract(address maticWETHAddress) external;
 }

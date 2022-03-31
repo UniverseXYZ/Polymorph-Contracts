@@ -17,6 +17,7 @@ contract PolymorphChild is IPolymorphChild, PolymorphWithGeneChanger {
         string memory symbol,
         string memory baseURI,
         address payable _daoAddress,
+        address _maticWETHAddress,
         uint256 _baseGenomeChangePrice,
         uint256 _randomizeGenomePrice,
         string memory _arweaveAssetsJSON
@@ -34,6 +35,8 @@ contract PolymorphChild is IPolymorphChild, PolymorphWithGeneChanger {
         daoAddress = _daoAddress;
         arweaveAssetsJSON = _arweaveAssetsJSON;
         geneGenerator.random();
+
+        setMaticWETHContract(_maticWETHAddress);
     }
 
     function mint(address to)
