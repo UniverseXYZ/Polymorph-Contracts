@@ -6,25 +6,17 @@
  require('hardhat-contract-sizer');
  require('dotenv').config();
  require("solidity-coverage");
+ require("@tenderly/hardhat-tenderly");
 
   module.exports = {
    solidity: {
      compilers: [
        {
-         version: "0.7.4",
+         version: "0.8.9",
          settings: {
-          optimizer: {
+          optimizer: { 
             enabled: true,
-            runs: 200,
-          }
-        }
-       },
-       {
-         version: "0.8.4",
-         settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
+            runs: 200
           }
         }  
        },
@@ -45,24 +37,32 @@
          count: 100,
        },
        forking: {
-         url: `https://eth-goerli.alchemyapi.io/v2/${process.env.GOERLI_ALCHEMY_KEY}`,
+         url: `https://goerli.infura.io/v3/${process.env.GOERLI_INFURA_KEY}`,
          blockNumber: 5381730
        }  
      },
      goerli: {
-       url: `https://eth-goerli.alchemyapi.io/v2/${process.env.GOERLI_ALCHEMY_KEY}`,
+       url: `https://goerli.infura.io/v3/${process.env.GOERLI_INFURA_KEY}`,
        accounts: [process.env.PRIVATE_KEY],
      },
      rinkeby: {
       url: `https://rinkeby.infura.io/v3/${process.env.INFURA_API_KEY}`,
       accounts: [process.env.PRIVATE_KEY]
     },
-     mumbai: {
+    ropsten: {
+      url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      accounts: [process.env.PRIVATE_KEY]
+    },
+    mumbai: {
        url: `https://polygon-mumbai.g.alchemy.com/v2/${process.env.MUMBAI_ALCHEMY_KEY}`,
        accounts: [process.env.PRIVATE_KEY],
      },
    },
    etherscan: {
-     apiKey: process.env.ETHERSCAN_API_KEY,
-   },  
+    apiKey: {
+      rinkeby: process.env.ETHERSCAN_API_KEY,
+      goerli: process.env.ETHERSCAN_API_KEY,
+      polygonMumbai: process.env.POLYGONSCAN_API_KEY
+    }
+   }
  }

@@ -9,33 +9,27 @@ async function printDeployerInfo() {
   const [deployer] = await ethers.getSigners();
   console.log("Deploying contracts with the account:", deployer.address);
   console.log("Account balance:", (await deployer.getBalance()).toString());
-
 }
 
-async function rootTunnelDeploy() {
+async function TestTokenDeploy() {
   await printDeployerInfo();
 
-  const goerliCheckpoint = "0x2890bA17EfE978480615e330ecB65333b880928e";
-  const goerliFxRoot = "0x3d1d3E34f7fB6D26245E6640E1c50710eFFf15bA";
-  //TODO: My wallet address. Change this when we have real dao address
-  const daoAddress = "0x8FcE67537676879Bc5a1B86B403400E1614Bfce6";
+    const testToken = await hre.ethers.getContractFactory("TestERC20");
+    const testtoken = await testToken.deploy();
 
-  const RootTunnel = await hre.ethers.getContractFactory("PolymorphRootTunnel");
-  const rootTunnel = await RootTunnel.deploy(goerliCheckpoint, goerliFxRoot, daoAddress);
-
-  await rootTunnel.deployed();
+  await testtoken.deployed();
 
   await hre.tenderly.persistArtifacts({
-    name: "PolymorphRootTunnel",
-    address: rootTunnel.address,
+    name: "TestERC20",
+    address: testtoken.address,
   });
 
-  console.log(`Root tunnel address: ${rootTunnel.address}`);
+  console.log(`TestERC20 address: ${testtoken.address}`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-rootTunnelDeploy()
+TestTokenDeploy()
   .then(() => process.exit(0))
   .catch((error) => {
     console.error(error);

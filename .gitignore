@@ -12,3 +12,6 @@ deploy.sh
 jsconfig.json
 hardhat.config.js
 .history
+tenderly.yaml
+notebooks/.ipynb_checkpoints
+deployments

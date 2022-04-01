@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721Burnable.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721Pausable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
+import "./ERC721Consumable.sol";
 
 /**
  * @dev {ERC721} token, including:
@@ -26,7 +27,9 @@ import "@openzeppelin/contracts/token/ERC721/ERC721Pausable.sol";
  */
 contract ERC721PresetMinterPauserAutoId is
     Context,
-    AccessControl,
+    AccessControlEnumerable,
+    ERC721Consumable,
+    ERC721Enumerable,
     ERC721Burnable,
     ERC721Pausable
 {
@@ -36,6 +39,8 @@ contract ERC721PresetMinterPauserAutoId is
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     Counters.Counter internal _tokenIdTracker;
+
+    string private _baseTokenURI;
 
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE`, `MINTER_ROLE` and `PAUSER_ROLE` to the
@@ -47,14 +52,26 @@ contract ERC721PresetMinterPauserAutoId is
     constructor(
         string memory name,
         string memory symbol,
-        string memory baseURI
-    ) public ERC721(name, symbol) {
+        string memory baseTokenURI
+    ) ERC721(name, symbol) {
+        _baseTokenURI = baseTokenURI;
+
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
 
         _setupRole(MINTER_ROLE, _msgSender());
         _setupRole(PAUSER_ROLE, _msgSender());
+    }
 
-        _setBaseURI(baseURI);
+    function _setBaseURI(string memory baseURI_) internal virtual {
+        _baseTokenURI = baseURI_;
+    }
+
+    function _baseURI() internal view virtual override returns (string memory) {
+        return _baseTokenURI;
+    }
+
+    function baseURI() external view virtual returns (string memory) {
+        return _baseURI();
     }
 
     /**
@@ -118,7 +135,29 @@ contract ERC721PresetMinterPauserAutoId is
         address from,
         address to,
         uint256 tokenId
-    ) internal virtual override(ERC721, ERC721Pausable) {
+    )
+        internal
+        virtual
+        override(ERC721, ERC721Consumable, ERC721Enumerable, ERC721Pausable)
+    {
         super._beforeTokenTransfer(from, to, tokenId);
+    }
+
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(
+            AccessControlEnumerable,
+            ERC721,
+            ERC721Consumable,
+            ERC721Enumerable
+        )
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
     }
 }

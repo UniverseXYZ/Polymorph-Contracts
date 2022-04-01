@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 
 import "./IPolymorphRoot.sol";
 import "../base/Polymorph.sol";
@@ -9,6 +9,21 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
     using SafeMath for uint256;
     using Counters for Counters.Counter;
+
+    struct Params {
+        string name;
+        string symbol;
+        string baseURI;
+        address payable _daoAddress;
+        uint256 premintedTokensCount;
+        uint256 _baseGenomeChangePrice;
+        uint256 _polymorphPrice;
+        uint256 _maxSupply;
+        uint256 _randomizeGenomePrice;
+        uint256 _bulkBuyLimit;
+        string _arweaveAssetsJSON;
+        address _polymorphV1Address;
+    }
 
     uint256 public polymorphPrice;
     uint256 public maxSupply;
@@ -21,38 +36,27 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
     event MaxSupplyChanged(uint256 newMaxSupply);
     event BulkBuyLimitChanged(uint256 newBulkBuyLimit);
 
-    constructor(
-        string memory name,
-        string memory symbol,
-        string memory baseURI,
-        address payable _daoAddress,
-        uint256 premintedTokensCount,
-        uint256 _baseGenomeChangePrice,
-        uint256 _polymorphPrice,
-        uint256 _maxSupply,
-        uint256 _randomizeGenomePrice,
-        uint256 _bulkBuyLimit,
-        string memory _arweaveAssetsJSON,
-        address _polymorphV1Address
-    )
+    constructor(Params memory params)
         PolymorphWithGeneChanger(
-            name,
-            symbol,
-            baseURI,
-            _daoAddress,
-            _baseGenomeChangePrice,
-            _randomizeGenomePrice,
-            _arweaveAssetsJSON
+            params.name,
+            params.symbol,
+            params.baseURI,
+            params._daoAddress,
+            params._baseGenomeChangePrice,
+            params._randomizeGenomePrice,
+            params._arweaveAssetsJSON
         )
     {
-        polymorphPrice = _polymorphPrice;
-        maxSupply = _maxSupply;
-        bulkBuyLimit = _bulkBuyLimit;
-        arweaveAssetsJSON = _arweaveAssetsJSON;
-        polymorphV1Contract = Polymorph(_polymorphV1Address);
+        polymorphPrice = params._polymorphPrice;
+        maxSupply = params._maxSupply;
+
+        bulkBuyLimit = params._bulkBuyLimit;
+
+        arweaveAssetsJSON = params._arweaveAssetsJSON;
+        polymorphV1Contract = Polymorph(params._polymorphV1Address);
         geneGenerator.random();
 
-        _preMint(premintedTokensCount);
+        _preMint(params.premintedTokensCount);
     }
 
     function _preMint(uint256 amountToMint) internal {

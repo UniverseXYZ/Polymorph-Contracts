@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 
 // IFxMessageProcessor represents interface to process message
 interface IFxMessageProcessor {
@@ -37,7 +37,7 @@ abstract contract FxBaseChildTunnel is IFxMessageProcessor {
     }
 
     // set fxRootTunnel if not set already
-    function setFxRootTunnel(address _fxRootTunnel) external {
+    function setFxRootTunnel(address _fxRootTunnel) external virtual {
         require(
             fxRootTunnel == address(0x0),
             "FxBaseChildTunnel: ROOT_TUNNEL_ALREADY_SET"

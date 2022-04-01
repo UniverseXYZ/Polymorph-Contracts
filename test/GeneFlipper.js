@@ -9,7 +9,7 @@ describe('Gene Flipper', () => {
     let polymorphInstance;
     let flipFactory;
     
-    let name = "PolymorphWithGeneChanger"
+    let tokenName = "PolymorphWithGeneChanger"
     let token = "POLY";
     let baseUri = "http://www.kekdao.com/";
     let premintedTokensCount = 5;
@@ -29,9 +29,24 @@ describe('Gene Flipper', () => {
       aliceAccount = alice;
       bobsAccount = bob;
       deployer = user
+
+      const constructorArgs = {
+        name: tokenName,
+        symbol: token,
+        baseURI: baseUri,
+        _daoAddress: DAO.address,
+        premintedTokensCount: premintedTokensCount,
+        _baseGenomeChangePrice: defaultGenomeChangePrice,
+        _polymorphPrice: polymorphPrice,
+        _maxSupply: totalSupply,
+        _randomizeGenomePrice: randomizeGenomePrice,
+        _bulkBuyLimit: bulkBuyLimit,
+        _arweaveAssetsJSON: arweaveAssetsJSON,
+        _polymorphV1Address: polymorphV1Address,
+      };
   
       const PolymorphRoot = await ethers.getContractFactory("PolymorphRoot");
-      polymorphInstance = await PolymorphRoot.deploy(name, token, baseUri, DAO.address, premintedTokensCount, defaultGenomeChangePrice, polymorphPrice, totalSupply, randomizeGenomePrice, bulkBuyLimit, arweaveAssetsJSON, polymorphV1Address);
+      polymorphInstance = await PolymorphRoot.deploy(constructorArgs);
       console.log(`Polymorph instance deployed to: ${polymorphInstance.address}`);
 
       const FlipFactory = await ethers.getContractFactory("FlipFactory");
@@ -55,7 +70,8 @@ describe('Gene Flipper', () => {
       const genePosition = 70; // Position of the attribute gene in the gene string
       const geneVariation = 24; // This is the number of traits of the attribute that will be flipped
       const geneWanted = 2; // This is the number of the trait that we want
-      await expect(Flip.deploy(tokenId, genePosition, geneVariation, geneWanted, deployer.address)).revertedWith("Msg sender should be original caller");
+      
+      await expect(Flip.deploy(tokenId, genePosition, geneVariation, geneWanted, deployer.address)).to.be.revertedWith("Msg sender should be original caller");
       
       
       // const flipperByteCode = "";

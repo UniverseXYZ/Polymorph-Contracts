@@ -2,7 +2,7 @@
  * @author Hamdi Allam hamdi.allam97@gmail.com
  * Please reach out with any questions or concerns
  */
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 
 library RLPReader {
     uint8 constant STRING_SHORT_START = 0x80;
@@ -358,8 +358,11 @@ library RLPReader {
             dest += WORD_SIZE;
         }
 
+        if (len == 0) return;
+
         // left over bytes. Mask is used to remove unwanted bytes from the word
         uint256 mask = 256**(WORD_SIZE - len) - 1;
+
         assembly {
             let srcpart := and(mload(src), not(mask)) // zero out src
             let destpart := and(mload(dest), mask) // retrieve the bytes

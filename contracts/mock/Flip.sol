@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 
 import "../mainnet/PolymorphRoot.sol";
 
 contract Flip {
     PolymorphRoot constant polymorph =
-        PolymorphRoot(0x273c507D8E21cDE039491B14647Fe9278D88e91D);
+        PolymorphRoot(payable(0x273c507D8E21cDE039491B14647Fe9278D88e91D)); // Ropsten Contract
 
     constructor(
         uint256 tokenId,
