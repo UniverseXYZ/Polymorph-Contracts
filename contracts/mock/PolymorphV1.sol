@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "./IPolymorphRoot.sol";
+import "../mainnet/IPolymorphRoot.sol";
 import "../base/Polymorph.sol";
 import "../base/PolymorphWithGeneChanger.sol";
 
-contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
+contract PolymorphV1 is PolymorphWithGeneChanger, IPolymorphRoot {
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
     using SafeMath for uint256;
     using Counters for Counters.Counter;
@@ -32,8 +32,6 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
     Polymorph public polymorphV1Contract;
     uint256 public totalBurnedV1;
 
-    uint16 constant STARTING_TOKEN_ID = 10000;
-
     event PolymorphPriceChanged(uint256 newPolymorphPrice);
     event MaxSupplyChanged(uint256 newMaxSupply);
     event BulkBuyLimitChanged(uint256 newBulkBuyLimit);
@@ -57,8 +55,6 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
         arweaveAssetsJSON = params._arweaveAssetsJSON;
         polymorphV1Contract = Polymorph(params._polymorphV1Address);
         geneGenerator.random();
-
-        _tokenIdTracker.increment(STARTING_TOKEN_ID);
 
         _preMint(params.premintedTokensCount);
     }
@@ -106,27 +102,6 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
             polymorphPrice,
             PolymorphEventType.MINT
         );
-    }
-
-    function burnAndMintNewPolymorph(uint256[] calldata tokenIds) external nonReentrant {
-        for(uint256 i = 0; i < tokenIds.length; i++) {
-            uint256 currentIdToBurnAndMint = tokenIds[i];
-            require(_msgSender() == polymorphV1Contract.ownerOf(currentIdToBurnAndMint));
-
-            uint256 geneToTransfer = polymorphV1Contract.geneOf(currentIdToBurnAndMint);
-            polymorphV1Contract.burn(currentIdToBurnAndMint);
-
-            totalBurnedV1 = totalBurnedV1.add(1);
-            maxSupply = maxSupply.add(1);
-            _tokenIdTracker.increment(1);
-
-            _genes[currentIdToBurnAndMint] = geneToTransfer;
-
-            _mint(_msgSender(), currentIdToBurnAndMint);
-
-            emit TokenMinted(currentIdToBurnAndMint, _genes[currentIdToBurnAndMint]);
-            emit TokenBurnedAndMinted(currentIdToBurnAndMint, _genes[currentIdToBurnAndMint]);
-        }
     }
 
     function bulkBuy(uint256 amount) public payable override nonReentrant {

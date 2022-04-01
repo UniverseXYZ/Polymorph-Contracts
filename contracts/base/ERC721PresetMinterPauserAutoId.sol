@@ -4,10 +4,10 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
+import "../lib/Counters.sol";
 import "./ERC721Consumable.sol";
 
 /**
@@ -94,7 +94,7 @@ contract ERC721PresetMinterPauserAutoId is
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
         _mint(to, _tokenIdTracker.current());
-        _tokenIdTracker.increment();
+        _tokenIdTracker.increment(1);
     }
 
     /**

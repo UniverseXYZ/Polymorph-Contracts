@@ -21,7 +21,7 @@ contract FlipFactory is ERC721Holder {
             bytes32(0),
             keccak256(bytecode)
         );
-        console.log(msg.sender, polymorph.ownerOf(morphId));
+        // console.log(msg.sender, polymorph.ownerOf(morphId));
         polymorph.safeTransferFrom(msg.sender, expectedAddress, morphId);
         _bytecode = bytecode;
         search(limit);
@@ -47,7 +47,7 @@ contract FlipFactory is ERC721Holder {
             );
             tries++;
         }
-        console.log(success, "Tries: ", tries);
+        // console.log(success, "Tries: ", tries);
         require(success, "Unsuccessful search");
     }
 }
