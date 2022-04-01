@@ -82,109 +82,109 @@ describe("PolymorphRootBurnAndMint", () => {
     await expect(+totalBurned + tokensToBurnArrLen).eq(totalBurnedNew);
   });
 
-  it("burnAndMintNewPolymorph increments contract max supply", async () => {
-    const PolymorphRoot = await ethers.getContractFactory("PolymorphRoot");
+//   it("burnAndMintNewPolymorph increments contract max supply", async () => {
+//     const PolymorphRoot = await ethers.getContractFactory("PolymorphRoot");
 
-    const PolymorphV1 = await ethers.getContractFactory("PolymorphV1");
+//     const PolymorphV1 = await ethers.getContractFactory("PolymorphV1");
 
-    v1Instance = await PolymorphV1.deploy(constructorArgs);
+//     v1Instance = await PolymorphV1.deploy(constructorArgs);
 
-    constructorArgs["_polymorphV1Address"] = v1Instance.address;
+//     constructorArgs["_polymorphV1Address"] = v1Instance.address;
 
-    v2Instance = await PolymorphRoot.deploy(constructorArgs);
+//     v2Instance = await PolymorphRoot.deploy(constructorArgs);
 
-    const bulkBuyCount = 5;
+//     const bulkBuyCount = 5;
 
-    await v1Instance.bulkBuy(bulkBuyCount, {
-      value: polymorphPrice.mul(bulkBuyCount),
-    });
+//     await v1Instance.bulkBuy(bulkBuyCount, {
+//       value: polymorphPrice.mul(bulkBuyCount),
+//     });
 
-    const tokensToBurn = [1, 3, 5];
-    const tokensToBurnArrLen = 3;
+//     const tokensToBurn = [1, 3, 5];
+//     const tokensToBurnArrLen = 3;
 
-    tokensToBurn.forEach(async (burnTokenId) => {
-      await v1Instance.approve(v2Instance.address, burnTokenId);
-    });
+//     tokensToBurn.forEach(async (burnTokenId) => {
+//       await v1Instance.approve(v2Instance.address, burnTokenId);
+//     });
 
-    const maxSupply = await v2Instance.maxSupply();
+//     const maxSupply = await v2Instance.maxSupply();
 
-    await v2Instance.burnAndMintNewPolymorph(tokensToBurn);
+//     await v2Instance.burnAndMintNewPolymorph(tokensToBurn);
 
-    const maxSupplyNew = await v2Instance.maxSupply();
+//     const maxSupplyNew = await v2Instance.maxSupply();
 
-    await expect(+maxSupply + tokensToBurnArrLen).eq(maxSupplyNew);
-  });
+//     await expect(+maxSupply + tokensToBurnArrLen).eq(maxSupplyNew);
+//   });
 
-  it("burnAndMintNewPolymorph increments contract token id counter", async () => {
-    const PolymorphRoot = await ethers.getContractFactory("PolymorphRoot");
+//   it("burnAndMintNewPolymorph increments contract token id counter", async () => {
+//     const PolymorphRoot = await ethers.getContractFactory("PolymorphRoot");
 
-    const PolymorphV1 = await ethers.getContractFactory("PolymorphV1");
+//     const PolymorphV1 = await ethers.getContractFactory("PolymorphV1");
 
-    v1Instance = await PolymorphV1.deploy(constructorArgs);
+//     v1Instance = await PolymorphV1.deploy(constructorArgs);
 
-    constructorArgs["_polymorphV1Address"] = v1Instance.address;
+//     constructorArgs["_polymorphV1Address"] = v1Instance.address;
 
-    v2Instance = await PolymorphRoot.deploy(constructorArgs);
+//     v2Instance = await PolymorphRoot.deploy(constructorArgs);
 
-    const bulkBuyCount = 5;
+//     const bulkBuyCount = 5;
 
-    await v1Instance.bulkBuy(bulkBuyCount, {
-      value: polymorphPrice.mul(bulkBuyCount),
-    });
+//     await v1Instance.bulkBuy(bulkBuyCount, {
+//       value: polymorphPrice.mul(bulkBuyCount),
+//     });
 
-    const tokensToBurn = [1, 3, 5];
-    const tokensToBurnArrLen = 3;
+//     const tokensToBurn = [1, 3, 5];
+//     const tokensToBurnArrLen = 3;
 
-    tokensToBurn.forEach(async (burnTokenId) => {
-      await v1Instance.approve(v2Instance.address, burnTokenId);
-    });
+//     tokensToBurn.forEach(async (burnTokenId) => {
+//       await v1Instance.approve(v2Instance.address, burnTokenId);
+//     });
 
-    const lastTokenId = await v2Instance.lastTokenId();
+//     const lastTokenId = await v2Instance.lastTokenId();
 
-    await v2Instance.burnAndMintNewPolymorph(tokensToBurn);
+//     await v2Instance.burnAndMintNewPolymorph(tokensToBurn);
 
-    const lastTokenIdNew = await v2Instance.lastTokenId();
+//     const lastTokenIdNew = await v2Instance.lastTokenId();
 
-    await expect(+lastTokenId + tokensToBurnArrLen).eq(lastTokenIdNew);
-  });
+//     await expect(+lastTokenId + tokensToBurnArrLen).eq(lastTokenIdNew);
+//   });
 
-  it("burnAndMintNewPolymorph increments all counters at the same time", async () => {
-    const PolymorphRoot = await ethers.getContractFactory("PolymorphRoot");
+//   it("burnAndMintNewPolymorph increments all counters at the same time", async () => {
+//     const PolymorphRoot = await ethers.getContractFactory("PolymorphRoot");
 
-    const PolymorphV1 = await ethers.getContractFactory("PolymorphV1");
+//     const PolymorphV1 = await ethers.getContractFactory("PolymorphV1");
 
-    v1Instance = await PolymorphV1.deploy(constructorArgs);
+//     v1Instance = await PolymorphV1.deploy(constructorArgs);
 
-    constructorArgs["_polymorphV1Address"] = v1Instance.address;
+//     constructorArgs["_polymorphV1Address"] = v1Instance.address;
 
-    v2Instance = await PolymorphRoot.deploy(constructorArgs);
-    const bulkBuyCount = 5;
+//     v2Instance = await PolymorphRoot.deploy(constructorArgs);
+//     const bulkBuyCount = 5;
 
-    await v1Instance.bulkBuy(bulkBuyCount, {
-      value: polymorphPrice.mul(bulkBuyCount),
-    });
+//     await v1Instance.bulkBuy(bulkBuyCount, {
+//       value: polymorphPrice.mul(bulkBuyCount),
+//     });
 
-    const tokensToBurn = [1, 3, 5];
-    const tokensToBurnArrLen = 3;
+//     const tokensToBurn = [1, 3, 5];
+//     const tokensToBurnArrLen = 3;
 
-    tokensToBurn.forEach(async (burnTokenId) => {
-      await v1Instance.approve(v2Instance.address, burnTokenId);
-    });
+//     tokensToBurn.forEach(async (burnTokenId) => {
+//       await v1Instance.approve(v2Instance.address, burnTokenId);
+//     });
 
-    const totalBurned = await v2Instance.totalBurnedV1();
-    const maxSupply = await v2Instance.maxSupply();
-    const lastTokenId = await v2Instance.lastTokenId();
+//     const totalBurned = await v2Instance.totalBurnedV1();
+//     const maxSupply = await v2Instance.maxSupply();
+//     const lastTokenId = await v2Instance.lastTokenId();
 
-    await v2Instance.burnAndMintNewPolymorph(tokensToBurn);
+//     await v2Instance.burnAndMintNewPolymorph(tokensToBurn);
 
-    const totalBurnedNew = await v2Instance.totalBurnedV1();
-    const maxSupplyNew = await v2Instance.maxSupply();
-    const lastTokenIdNew = await v2Instance.lastTokenId();
+//     const totalBurnedNew = await v2Instance.totalBurnedV1();
+//     const maxSupplyNew = await v2Instance.maxSupply();
+//     const lastTokenIdNew = await v2Instance.lastTokenId();
 
-    await expect(+totalBurned + tokensToBurnArrLen).eq(totalBurnedNew);
-    await expect(+maxSupply + tokensToBurnArrLen).eq(maxSupplyNew);
-    await expect(+lastTokenId + tokensToBurnArrLen).eq(lastTokenIdNew);
-  });
+//     await expect(+totalBurned + tokensToBurnArrLen).eq(totalBurnedNew);
+//     await expect(+maxSupply + tokensToBurnArrLen).eq(maxSupplyNew);
+//     await expect(+lastTokenId + tokensToBurnArrLen).eq(lastTokenIdNew);
+//   });
 
   it("burnAndMintNewPolymorph preserves the newly minted polymorphs he same id and genome", async () => {
     const PolymorphRoot = await ethers.getContractFactory("PolymorphRoot");

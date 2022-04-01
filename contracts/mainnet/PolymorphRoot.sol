@@ -117,8 +117,8 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
             polymorphV1Contract.burn(currentIdToBurnAndMint);
 
             totalBurnedV1 = totalBurnedV1.add(1);
-            maxSupply = maxSupply.add(1);
-            _tokenIdTracker.increment(1);
+            // maxSupply = maxSupply.add(1);
+            // _tokenIdTracker.increment(1);
 
             _genes[currentIdToBurnAndMint] = geneToTransfer;
 
