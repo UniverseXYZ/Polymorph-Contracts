@@ -58,7 +58,7 @@ contract ERC721PresetMinterPauserAutoId is
 
         _setupRole(MINTER_ROLE, _msgSender());
         _setupRole(PAUSER_ROLE, _msgSender());
-        
+
     }
 
     function _setBaseURI(string memory baseURI_) internal virtual {
