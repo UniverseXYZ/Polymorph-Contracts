@@ -8,7 +8,6 @@ import "../base/PolymorphWithGeneChanger.sol";
 contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
     using SafeMath for uint256;
-    using Counters for Counters.Counter;
 
     struct Params {
         string name;
@@ -32,7 +31,7 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
     Polymorph public polymorphV1Contract;
     uint256 public totalBurnedV1;
 
-    uint16 constant STARTING_TOKEN_ID = 10000;
+    uint16 constant private STARTING_TOKEN_ID = 10000;
 
     event PolymorphPriceChanged(uint256 newPolymorphPrice);
     event MaxSupplyChanged(uint256 newMaxSupply);
@@ -58,27 +57,25 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
         polymorphV1Contract = Polymorph(params._polymorphV1Address);
         geneGenerator.random();
 
-        _tokenIdTracker.increment(STARTING_TOKEN_ID);
+        _tokenId += STARTING_TOKEN_ID;
 
         _preMint(params.premintedTokensCount);
     }
 
     function _preMint(uint256 amountToMint) internal {
         for (uint256 i = 0; i < amountToMint; i++) {
-            _tokenIdTracker.increment(1);
-            uint256 tokenId = _tokenIdTracker.current();
-            _genes[tokenId] = geneGenerator.random();
-            _mint(_msgSender(), tokenId);
+            _tokenId += 1;
+            _genes[_tokenId] = geneGenerator.random();
+            _mint(_msgSender(), _tokenId);
         }
     }
 
     function mint() public payable override nonReentrant {
-        require(_tokenIdTracker.current() < maxSupply, "Total supply reached");
+        require(_tokenId < maxSupply, "Total supply reached");
 
-        _tokenIdTracker.increment(1);
+        _tokenId += 1;
 
-        uint256 tokenId = _tokenIdTracker.current();
-        _genes[tokenId] = geneGenerator.random();
+        _genes[_tokenId] = geneGenerator.random();
 
         (bool transferToDaoStatus, ) = daoAddress.call{value: polymorphPrice}(
             ""
@@ -96,13 +93,13 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
             require(returnExcessStatus, "Failed to return excess.");
         }
 
-        _mint(_msgSender(), tokenId);
+        _mint(_msgSender(), _tokenId);
 
-        emit TokenMinted(tokenId, _genes[tokenId]);
+        emit TokenMinted(_tokenId, _genes[_tokenId]);
         emit TokenMorphed(
-            tokenId,
+            _tokenId,
             0,
-            _genes[tokenId],
+            _genes[_tokenId],
             polymorphPrice,
             PolymorphEventType.MINT
         );
@@ -135,7 +132,7 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
             "Cannot bulk buy more than the preset limit"
         );
         require(
-            _tokenIdTracker.current().add(amount) <= maxSupply,
+            _tokenId + amount <= maxSupply,
             "Total supply reached"
         );
 
@@ -156,17 +153,16 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
         }
 
         for (uint256 i = 0; i < amount; i++) {
-            _tokenIdTracker.increment(1);
+            _tokenId += 1;
 
-            uint256 tokenId = _tokenIdTracker.current();
-            _genes[tokenId] = geneGenerator.random();
-            _mint(_msgSender(), tokenId);
+            _genes[_tokenId] = geneGenerator.random();
+            _mint(_msgSender(), _tokenId);
 
-            emit TokenMinted(tokenId, _genes[tokenId]);
+            emit TokenMinted(_tokenId, _genes[_tokenId]);
             emit TokenMorphed(
-                tokenId,
+                _tokenId,
                 0,
-                _genes[tokenId],
+                _genes[_tokenId],
                 polymorphPrice,
                 PolymorphEventType.MINT
             );

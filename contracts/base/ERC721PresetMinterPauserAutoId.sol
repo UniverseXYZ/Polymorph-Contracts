@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
-import "../lib/Counters.sol";
 import "./ERC721Consumable.sol";
 
 /**
@@ -33,12 +32,11 @@ contract ERC721PresetMinterPauserAutoId is
     ERC721Burnable,
     ERC721Pausable
 {
-    using Counters for Counters.Counter;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
-    Counters.Counter internal _tokenIdTracker;
+    uint256 internal _tokenId;
 
     string private _baseTokenURI;
 
@@ -60,6 +58,8 @@ contract ERC721PresetMinterPauserAutoId is
 
         _setupRole(MINTER_ROLE, _msgSender());
         _setupRole(PAUSER_ROLE, _msgSender());
+
+        _tokenId = 0;
     }
 
     function _setBaseURI(string memory baseURI_) internal virtual {
@@ -93,8 +93,8 @@ contract ERC721PresetMinterPauserAutoId is
 
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
-        _mint(to, _tokenIdTracker.current());
-        _tokenIdTracker.increment(1);
+        _mint(to, _tokenId);
+        _tokenId += 1;
     }
 
     /**

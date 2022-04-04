@@ -56,6 +56,24 @@ describe("PolymorphRootOld", () => {
 		await polymorphInstance.connect(dao).setMaxSupply(daoVotedSupply);
   });
 
+  it(`first token id should be ${startTokenId + 1}`, async () => {
+    const [user, dao] = await ethers.getSigners();
+
+    const PolymorphRootNoPremint = await ethers.getContractFactory("PolymorphRoot");
+
+    constructorArgs['premintedTokensCount'] = 0;
+
+    polymorphInstanceNoPremint = await PolymorphRootNoPremint.deploy(constructorArgs);
+
+    await polymorphInstanceNoPremint.connect(dao).setMaxSupply(daoVotedSupply);
+
+    await polymorphInstanceNoPremint["mint()"]({ value: polymorphPrice });
+
+    const lastToken = await polymorphInstanceNoPremint.lastTokenId();
+
+    expect(lastToken).eq(startTokenId + 1);
+  });
+
   it(`should premint ${premintedTokensCount} tokens`, async () => {
     const lastToken = await polymorphInstance.lastTokenId();
     const ownerOfTheFirstToken = await polymorphInstance.ownerOf(10001);

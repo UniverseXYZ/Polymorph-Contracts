@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 import "./IPolymorph.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "../lib/Counters.sol";
 import "../base/ERC721PresetMinterPauserAutoId.sol";
 import "../lib/PolymorphGeneGenerator.sol";
 import "../modifiers/DAOControlled.sol";
@@ -14,7 +13,6 @@ abstract contract Polymorph is
     ReentrancyGuard,
     DAOControlled
 {
-    using Counters for Counters.Counter;
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
 
     PolymorphGeneGenerator.Gene internal geneGenerator;
@@ -66,7 +64,7 @@ abstract contract Polymorph is
     }
 
     function lastTokenId() public view override returns (uint256 tokenId) {
-        return _tokenIdTracker.current();
+        return _tokenId;
     }
 
     function _beforeTokenTransfer(

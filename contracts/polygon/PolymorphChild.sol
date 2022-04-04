@@ -36,7 +36,7 @@ contract PolymorphChild is IPolymorphChild, PolymorphWithGeneChanger {
         arweaveAssetsJSON = _arweaveAssetsJSON;
         geneGenerator.random();
 
-        setMaticWETHContract(_maticWETHAddress);
+        maticWETH = IERC20(_maticWETHAddress);
     }
 
     function mint(address to)
