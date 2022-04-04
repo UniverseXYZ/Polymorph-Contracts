@@ -57,14 +57,14 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
         polymorphV1Contract = Polymorph(params._polymorphV1Address);
         geneGenerator.random();
 
-        _tokenId += STARTING_TOKEN_ID;
+        _tokenId = _tokenId + STARTING_TOKEN_ID;
 
         _preMint(params.premintedTokensCount);
     }
 
     function _preMint(uint256 amountToMint) internal {
         for (uint256 i = 0; i < amountToMint; i++) {
-            _tokenId += 1;
+            _tokenId++;
             _genes[_tokenId] = geneGenerator.random();
             _mint(_msgSender(), _tokenId);
         }
@@ -73,7 +73,7 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
     function mint() public payable override nonReentrant {
         require(_tokenId < maxSupply, "Total supply reached");
 
-        _tokenId += 1;
+        _tokenId++;
 
         _genes[_tokenId] = geneGenerator.random();
 
@@ -114,8 +114,6 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
             polymorphV1Contract.burn(currentIdToBurnAndMint);
 
             totalBurnedV1 = totalBurnedV1.add(1);
-            // maxSupply = maxSupply.add(1);
-            // _tokenIdTracker.increment(1);
 
             _genes[currentIdToBurnAndMint] = geneToTransfer;
 
@@ -153,7 +151,7 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
         }
 
         for (uint256 i = 0; i < amount; i++) {
-            _tokenId += 1;
+            _tokenId++;
 
             _genes[_tokenId] = geneGenerator.random();
             _mint(_msgSender(), _tokenId);

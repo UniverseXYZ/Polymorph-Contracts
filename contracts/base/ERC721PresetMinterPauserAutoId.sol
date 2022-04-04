@@ -94,7 +94,7 @@ contract ERC721PresetMinterPauserAutoId is
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
         _mint(to, _tokenId);
-        _tokenId += 1;
+        _tokenId++;
     }
 
     /**
