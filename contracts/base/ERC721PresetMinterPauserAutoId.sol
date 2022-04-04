@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.13;
 
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
@@ -58,8 +58,7 @@ contract ERC721PresetMinterPauserAutoId is
 
         _setupRole(MINTER_ROLE, _msgSender());
         _setupRole(PAUSER_ROLE, _msgSender());
-
-        _tokenId = 0;
+        
     }
 
     function _setBaseURI(string memory baseURI_) internal virtual {

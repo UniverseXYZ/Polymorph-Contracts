@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity 0.8.13;
 
 import "../base/PolymorphWithGeneChanger.sol";
 import "./IPolymorphChild.sol";
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract PolymorphChild is IPolymorphChild, PolymorphWithGeneChanger {

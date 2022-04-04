@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity 0.8.13;
 
 import "../mainnet/IPolymorphRoot.sol";
 import "../base/Polymorph.sol";
@@ -7,7 +7,6 @@ import "../base/PolymorphWithGeneChanger.sol";
 
 contract PolymorphV1 is PolymorphWithGeneChanger, IPolymorphRoot {
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
-    using SafeMath for uint256;
 
     struct Params {
         string name;
@@ -81,7 +80,7 @@ contract PolymorphV1 is PolymorphWithGeneChanger, IPolymorphRoot {
             "Address: unable to send value, recipient may have reverted"
         );
 
-        uint256 excessAmount = msg.value.sub(polymorphPrice);
+        uint256 excessAmount = msg.value - polymorphPrice;
         if (excessAmount > 0) {
             (bool returnExcessStatus, ) = _msgSender().call{
                 value: excessAmount
@@ -112,14 +111,14 @@ contract PolymorphV1 is PolymorphWithGeneChanger, IPolymorphRoot {
         );
 
         (bool transferToDaoStatus, ) = daoAddress.call{
-            value: polymorphPrice.mul(amount)
+            value: polymorphPrice * amount
         }("");
         require(
             transferToDaoStatus,
             "Address: unable to send value, recipient may have reverted"
         );
 
-        uint256 excessAmount = msg.value.sub(polymorphPrice.mul(amount));
+        uint256 excessAmount = msg.value - (polymorphPrice * amount);
         if (excessAmount > 0) {
             (bool returnExcessStatus, ) = _msgSender().call{
                 value: excessAmount
