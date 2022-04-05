@@ -6,33 +6,26 @@
 
 ## Setup
 ### Contracts deployment
-- PolymorphRoot
-  - `npx hardhat run deployment/root-polymorph-deploy.js --network goerli`
-- PolymorphRootTunnel
-  - `npx hardhat run deployment/root-tunnel-deploy.js --network goerli`
-- PolymorphChild
-  - `npx hardhat run deployment/child-polymorph-deploy.js --network mumbai`
-- PolymorphChildTunnel
-  - `npx hardhat run deployment/child-tunnel-deploy.js --network mumbai`
-- TestERC20 (Needed for morphing a gene on Polygon)
-  - `npx hardhat run deployment/test-erc20-deploy.js --network mumbai`
+- `./scripts/deploy.sh`
 
 ### Etherscan verification
 
-- Polymorph Root Verification:
-    - `npx hardhat verify --network goerli contractAddress --constructor-args ./deployment/args/root-polymorph-args.js`
+- `./scripts/verify.sh`
 
-- RootTunnel Verification:
-    - `npx hardhat verify --network goerli <contractAddress> <"checkPointAddress"> <"fxRootAddress"> <"daoAddress">`
+  - Polymorph Root Verification:
+      - `npx hardhat verify --network goerli contractAddress --constructor-args ./deployment/args/root-polymorph-args.js`
 
-- Polymorph Child Verification:
-    - `npx hardhat verify --network mumbai <contractAddress> --constructor-args ./deployment/args/child-polymorph-args.js`
-   
-- ChildTunnel Verification:
-    - `npx hardhat verify --network mumbai <contractAddress> <"fxChildAddress"> <"daoAddress">`
+  - RootTunnel Verification:
+      - `npx hardhat verify --network goerli <contractAddress> <"checkPointAddress"> <"fxRootAddress"> <"daoAddress">`
 
-- TestERC20 Verification:
-  - `npx hardhat verify --network mumbai --contract contracts/polygon/TestERC20.sol:TestERC20 <contractAddress>`
+  - Polymorph Child Verification:
+      - `npx hardhat verify --network mumbai <contractAddress> --constructor-args ./deployment/args/child-polymorph-args.js`
+     
+  - ChildTunnel Verification:
+      - `npx hardhat verify --network mumbai <contractAddress> <"fxChildAddress"> <"daoAddress">`
+
+  - TestERC20 Verification:
+    - `npx hardhat verify --network mumbai --contract contracts/polygon/TestERC20.sol:TestERC20 <contractAddress>`
 
 ## Genome
 

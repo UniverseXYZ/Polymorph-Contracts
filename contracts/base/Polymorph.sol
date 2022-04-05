@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity 0.8.13;
 import "./IPolymorph.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "../base/ERC721PresetMinterPauserAutoId.sol";
 import "../lib/PolymorphGeneGenerator.sol";
 import "../modifiers/DAOControlled.sol";
@@ -14,7 +12,6 @@ abstract contract Polymorph is
     ReentrancyGuard,
     DAOControlled
 {
-    using Counters for Counters.Counter;
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
 
     PolymorphGeneGenerator.Gene internal geneGenerator;
@@ -30,8 +27,7 @@ abstract contract Polymorph is
     );
     event TokenMinted(uint256 indexed tokenId, uint256 newGene);
     event TokenBurnedAndMinted(
-        uint256 indexed oldTokenId,
-        uint256 indexed newTokenId,
+        uint256 indexed tokenId,
         uint256 gene
     );
     event BaseURIChanged(string baseURI);
@@ -67,7 +63,7 @@ abstract contract Polymorph is
     }
 
     function lastTokenId() public view override returns (uint256 tokenId) {
-        return _tokenIdTracker.current();
+        return _tokenId;
     }
 
     function _beforeTokenTransfer(

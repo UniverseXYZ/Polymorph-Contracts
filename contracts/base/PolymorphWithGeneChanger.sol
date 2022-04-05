@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity 0.8.13;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "../lib/PolymorphGeneGenerator.sol";
 import "../modifiers/TunnelEnabled.sol";
@@ -14,7 +13,6 @@ abstract contract PolymorphWithGeneChanger is
     TunnelEnabled
 {
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
-    using SafeMath for uint256;
     using Address for address;
 
     mapping(uint256 => uint256) internal _genomeChanges;
@@ -75,7 +73,7 @@ abstract contract PolymorphWithGeneChanger is
             "Address: unable to send value, recipient may have reverted"
         );
 
-        uint256 excessAmount = msg.value.sub(price);
+        uint256 excessAmount = msg.value - price;
         if (excessAmount > 0) {
             (bool returnExcessStatus, ) = _msgSender().call{
                 value: excessAmount
@@ -105,13 +103,15 @@ abstract contract PolymorphWithGeneChanger is
         require(genePosition < 38, "Bad gene position");
         uint256 mod = 0;
         if (genePosition > 0) {
-            mod = genome.mod(10**(genePosition * 2)); // Each gene is 2 digits long
+            mod = genome % (10**(genePosition * 2)); // Each gene is 2 digits long
         }
-        uint256 div = genome.div(10**((genePosition + 1) * 2)).mul(
+
+        uint256 div = genome / (10**((genePosition + 1) * 2)) * (
             10**((genePosition + 1) * 2)
         );
+
         uint256 insert = replacement * (10**(genePosition * 2));
-        newGene = div.add(insert).add(mod);
+        newGene = div + insert + mod;
         return newGene;
     }
 
@@ -132,7 +132,7 @@ abstract contract PolymorphWithGeneChanger is
             "Address: unable to send value, recipient may have reverted"
         );
 
-        uint256 excessAmount = msg.value.sub(randomizeGenomePrice);
+        uint256 excessAmount = msg.value - randomizeGenomePrice;
         if (excessAmount > 0) {
             (bool returnExcessStatus, ) = _msgSender().call{
                 value: excessAmount
@@ -170,7 +170,7 @@ abstract contract PolymorphWithGeneChanger is
     {
         uint256 pastChanges = _genomeChanges[tokenId];
 
-        return baseGenomeChangePrice.mul(1 << pastChanges);
+        return baseGenomeChangePrice * (1 << pastChanges);
     }
 
     function genomeChanges(uint256 tokenId)

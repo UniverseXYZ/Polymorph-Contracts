@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.13;
 
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
@@ -33,12 +32,11 @@ contract ERC721PresetMinterPauserAutoId is
     ERC721Burnable,
     ERC721Pausable
 {
-    using Counters for Counters.Counter;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
-    Counters.Counter internal _tokenIdTracker;
+    uint256 internal _tokenId;
 
     string private _baseTokenURI;
 
@@ -60,6 +58,7 @@ contract ERC721PresetMinterPauserAutoId is
 
         _setupRole(MINTER_ROLE, _msgSender());
         _setupRole(PAUSER_ROLE, _msgSender());
+
     }
 
     function _setBaseURI(string memory baseURI_) internal virtual {
@@ -93,8 +92,8 @@ contract ERC721PresetMinterPauserAutoId is
 
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
-        _mint(to, _tokenIdTracker.current());
-        _tokenIdTracker.increment();
+        _mint(to, _tokenId);
+        _tokenId++;
     }
 
     /**

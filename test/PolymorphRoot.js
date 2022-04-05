@@ -11,13 +11,17 @@ describe("PolymorphRootOld", () => {
   let token = "POLY";
   let baseUri = "http://www.kekdao.com/";
   let premintedTokensCount = 5;
-  let totalSupply = 20;
+  let totalSupply = 10000;
   let bulkBuyLimit = 20;
   let polymorphPrice = ethers.utils.parseEther("0.0777");
   let defaultGenomeChangePrice = ethers.utils.parseEther("0.01");
   let randomizeGenomePrice = ethers.utils.parseEther("0.02");
   let arweaveAssetsJSON = "JSON";
   let polymorphV1Address = "0x75D38741878da8520d1Ae6db298A9BD994A5D241";
+
+  const startTokenId = 10000;
+
+  const daoVotedSupply = 10500;
 
   let constructorArgs;
 
@@ -48,17 +52,38 @@ describe("PolymorphRootOld", () => {
     polymorphInstance = await PolymorphRoot.deploy(constructorArgs);
 
     console.log(`Polymorph instance deployed to: ${polymorphInstance.address}`);
+
+		await polymorphInstance.connect(dao).setMaxSupply(daoVotedSupply);
+  });
+
+  it(`first token id should be ${startTokenId + 1}`, async () => {
+    const [user, dao] = await ethers.getSigners();
+
+    const PolymorphRootNoPremint = await ethers.getContractFactory("PolymorphRoot");
+
+    constructorArgs['premintedTokensCount'] = 0;
+
+    polymorphInstanceNoPremint = await PolymorphRootNoPremint.deploy(constructorArgs);
+
+    await polymorphInstanceNoPremint.connect(dao).setMaxSupply(daoVotedSupply);
+
+    await polymorphInstanceNoPremint["mint()"]({ value: polymorphPrice });
+
+    const lastToken = await polymorphInstanceNoPremint.lastTokenId();
+
+    expect(lastToken).eq(startTokenId + 1);
   });
 
   it(`should premint ${premintedTokensCount} tokens`, async () => {
     const lastToken = await polymorphInstance.lastTokenId();
-    const ownerOfTheFirstToken = await polymorphInstance.ownerOf(1);
+    const ownerOfTheFirstToken = await polymorphInstance.ownerOf(10001);
 
     expect(deployer.address).eq(
       ownerOfTheFirstToken,
       "The preminted tokens were not given to the owner"
     );
-    expect(lastToken).eq(
+
+    expect(lastToken - startTokenId).eq(
       premintedTokensCount,
       "The preminted tokens count is not accurate"
     );
@@ -79,7 +104,7 @@ describe("PolymorphRootOld", () => {
     await polymorphInstance.bulkBuy(bulkBuyCount, { value: cost.mul(20) });
     const lastTokenId = await polymorphInstance.lastTokenId();
 
-    expect(lastTokenId).eq(premintedTokensCount + bulkBuyCount);
+    expect(lastTokenId - startTokenId).eq(premintedTokensCount + bulkBuyCount);
   });
 
   it(`transfer calls mint functionality`, async () => {
@@ -104,8 +129,8 @@ describe("PolymorphRootOld", () => {
 
     const kekBalanceAfter = await DAO.getBalance();
 
-    const geneA = await polymorphInstance.geneOf(premintedTokensCount + 1);
-    const geneB = await polymorphInstance.geneOf(premintedTokensCount + 2);
+    const geneA = await polymorphInstance.geneOf(startTokenId + 1);
+    const geneB = await polymorphInstance.geneOf(startTokenId + 2);
 
     expect(geneA).not.eq(geneB, "The two genes ended up the same");
 
@@ -118,9 +143,9 @@ describe("PolymorphRootOld", () => {
   it("should not change the gene on transfer", async () => {
     const bobsAddress = await bobsAccount.address;
 
-    const geneBefore = await polymorphInstance.geneOf(3);
-    await polymorphInstance.transferFrom(deployer.address, bobsAddress, 3);
-    const geneAfter = await polymorphInstance.geneOf(3);
+    const geneBefore = await polymorphInstance.geneOf(startTokenId + 3);
+    await polymorphInstance.transferFrom(deployer.address, bobsAddress, startTokenId + 3);
+    const geneAfter = await polymorphInstance.geneOf(startTokenId + 3);
 
     expect(geneBefore).eq(geneAfter, "The two genes ended up the same");
   });
@@ -142,7 +167,7 @@ describe("PolymorphRootOld", () => {
   });
 
   it("should evolve gene", async () => {
-    const tokenIdForMorphing = 2;
+    const tokenIdForMorphing = startTokenId + 2;
     const kekBalanceBefore = await DAO.getBalance();
 
     const geneBefore = await polymorphInstance.geneOf(tokenIdForMorphing);
@@ -193,7 +218,7 @@ describe("PolymorphRootOld", () => {
       "The price was not correct"
     );
 
-    await polymorphInstance.randomizeGenome(2, { value: price });
+    await polymorphInstance.randomizeGenome(startTokenId + 2, { value: price });
     const geneAfterReset = await polymorphInstance.geneOf(tokenIdForMorphing);
     expect(geneAfterReset).not.eq(geneAfter3, "The gene did not change");
 
@@ -202,7 +227,7 @@ describe("PolymorphRootOld", () => {
   });
 
   it("should not morph from a contract interactor", async () => {
-    const tokenIdForRandomize = 2;
+    const tokenIdForRandomize = startTokenId + 2;
     const geneBefore = await polymorphInstance.geneOf(tokenIdForRandomize);
 
     await polymorphInstance.randomizeGenome(tokenIdForRandomize, {
@@ -315,7 +340,7 @@ describe("PolymorphRootOld", () => {
 
     const cost = await mockedPolymorphInstance.polymorphPrice();
     await expect(
-      mockedPolymorphInstance.morphGene(premintedTokensCount, 2)
+      mockedPolymorphInstance.morphGene(startTokenId + premintedTokensCount, 2)
     ).revertedWith(
       "Address: unable to send value, recipient may have reverted"
     );
@@ -348,6 +373,7 @@ describe("PolymorphRootOld", () => {
     const MockedPolymorphRoot = await ethers.getContractFactory(
       "PolymorphRoot"
     );
+  
     const mockedPolymorphInstance = await MockedPolymorphRoot.deploy({
       name: name,
       symbol: token,
@@ -356,7 +382,7 @@ describe("PolymorphRootOld", () => {
       premintedTokensCount: premintedTokensCount,
       _baseGenomeChangePrice: defaultGenomeChangePrice,
       _polymorphPrice: polymorphPrice,
-      _maxSupply: totalSupply,
+      _maxSupply: daoVotedSupply,
       _randomizeGenomePrice: randomizeGenomePrice,
       _bulkBuyLimit: bulkBuyLimit,
       _arweaveAssetsJSON: arweaveAssetsJSON,
@@ -404,7 +430,7 @@ describe("PolymorphRootOld", () => {
         premintedTokensCount: premintedTokensCount,
         _baseGenomeChangePrice: defaultGenomeChangePrice,
         _polymorphPrice: polymorphPrice,
-        _maxSupply: totalSupply,
+        _maxSupply: daoVotedSupply,
         _randomizeGenomePrice: randomizeGenomePrice,
         _bulkBuyLimit: bulkBuyLimit,
         _arweaveAssetsJSON: arweaveAssetsJSON,
@@ -414,7 +440,7 @@ describe("PolymorphRootOld", () => {
 
     const cost = await mockedPolymorphInstance.polymorphPrice();
     await expect(
-      mockedPolymorphInstance.randomizeGenome(premintedTokensCount)
+      mockedPolymorphInstance.randomizeGenome(startTokenId + premintedTokensCount)
     ).revertedWith(
       "Address: unable to send value, recipient may have reverted"
     );
@@ -440,7 +466,7 @@ describe("PolymorphRootOld", () => {
       premintedTokensCount: premintedTokensCount,
       _baseGenomeChangePrice: defaultGenomeChangePrice,
       _polymorphPrice: polymorphPrice,
-      _maxSupply: totalSupply,
+      _maxSupply: daoVotedSupply,
       _randomizeGenomePrice: randomizeGenomePrice,
       _bulkBuyLimit: bulkBuyLimit,
       _arweaveAssetsJSON: arweaveAssetsJSON,
@@ -546,12 +572,12 @@ describe("PolymorphRootOld", () => {
   });
 
   it("should change max supply", async () => {
-    const newMaxSupply = 25;
+    const newMaxSupply = 11000;
 
     const totalSupplyBefore = await polymorphInstance.maxSupply();
     expect(totalSupplyBefore).eq(
-      totalSupply,
-      `The max supply was not ${totalSupply} in the beginning`
+      daoVotedSupply, // Note that there's a setMaxSupply() in Before hook, because of the burnAndMint nature of the v2 Polymorphs
+      `The max supply was not ${daoVotedSupply} in the beginning`
     );
 
     await polymorphInstance.connect(DAO).setMaxSupply(newMaxSupply);
@@ -666,126 +692,6 @@ describe("PolymorphRootOld", () => {
     await expect(
       polymorphInstance.wormholeUpdateGene(1, 12312312312, true, 2)
     ).to.be.revertedWith("Not called from the tunnel");
-  });
-
-  it("burnAndMintNewPolymorph increments contract total burned counter", async () => {
-    const PolymorphRoot = await ethers.getContractFactory("PolymorphRoot");
-    v1Instance = await PolymorphRoot.deploy(constructorArgs);
-
-    constructorArgs["_polymorphV1Address"] = v1Instance.address;
-
-    v2Instance = await PolymorphRoot.deploy(constructorArgs);
-    const bulkBuyCount = 3;
-    const burnTokenId = 2;
-
-    await v1Instance.bulkBuy(bulkBuyCount, {
-      value: polymorphPrice.mul(bulkBuyCount),
-    });
-
-    const totalBurned = await v2Instance.totalBurnedV1();
-
-    await v1Instance.approve(v2Instance.address, burnTokenId);
-    await v2Instance.burnAndMintNewPolymorph(burnTokenId);
-
-    const totalBurnedNew = await v2Instance.totalBurnedV1();
-
-    await expect(+totalBurned + 1).eq(totalBurnedNew);
-  });
-
-  it("burnAndMintNewPolymorph increments contract max supply", async () => {
-    const PolymorphRoot = await ethers.getContractFactory("PolymorphRoot");
-    v1Instance = await PolymorphRoot.deploy(constructorArgs);
-    constructorArgs["_polymorphV1Address"] = v1Instance.address;
-    v2Instance = await PolymorphRoot.deploy(constructorArgs);
-
-    const bulkBuyCount = 3;
-    const burnTokenId = 2;
-
-    await v1Instance.bulkBuy(bulkBuyCount, {
-      value: polymorphPrice.mul(bulkBuyCount),
-    });
-
-    const maxSupply = await v2Instance.maxSupply();
-
-    await v1Instance.approve(v2Instance.address, burnTokenId);
-    await v2Instance.burnAndMintNewPolymorph(burnTokenId);
-
-    const maxSupplyNew = await v2Instance.maxSupply();
-
-    await expect(+maxSupply + 1).eq(maxSupplyNew);
-  });
-
-  it("burnAndMintNewPolymorph increments contract token id counter", async () => {
-    const PolymorphRoot = await ethers.getContractFactory("PolymorphRoot");
-    v1Instance = await PolymorphRoot.deploy(constructorArgs);
-    constructorArgs["_polymorphV1Address"] = v1Instance.address;
-    v2Instance = await PolymorphRoot.deploy(constructorArgs);
-
-    const bulkBuyCount = 3;
-    const burnTokenId = 2;
-
-    await v1Instance.bulkBuy(bulkBuyCount, {
-      value: polymorphPrice.mul(bulkBuyCount),
-    });
-
-    const lastTokenId = await v2Instance.lastTokenId();
-
-    await v1Instance.approve(v2Instance.address, burnTokenId);
-    await v2Instance.burnAndMintNewPolymorph(burnTokenId);
-
-    const lastTokenIdNew = await v2Instance.lastTokenId();
-
-    await expect(+lastTokenId + 1).eq(lastTokenIdNew);
-  });
-
-  it("burnAndMintNewPolymorph increments all counters at the same time", async () => {
-    const PolymorphRoot = await ethers.getContractFactory("PolymorphRoot");
-    v1Instance = await PolymorphRoot.deploy(constructorArgs);
-    constructorArgs["_polymorphV1Address"] = v1Instance.address;
-    v2Instance = await PolymorphRoot.deploy(constructorArgs);
-    const bulkBuyCount = 3;
-    const burnTokenId = 2;
-
-    await v1Instance.bulkBuy(bulkBuyCount, {
-      value: polymorphPrice.mul(bulkBuyCount),
-    });
-
-    const totalBurned = await v2Instance.totalBurnedV1();
-    const maxSupply = await v2Instance.maxSupply();
-    const lastTokenId = await v2Instance.lastTokenId();
-
-    await v1Instance.approve(v2Instance.address, burnTokenId);
-    await v2Instance.burnAndMintNewPolymorph(burnTokenId);
-
-    const totalBurnedNew = await v2Instance.totalBurnedV1();
-    const maxSupplyNew = await v2Instance.maxSupply();
-    const lastTokenIdNew = await v2Instance.lastTokenId();
-
-    await expect(+totalBurned + 1).eq(totalBurnedNew);
-    await expect(+maxSupply + 1).eq(maxSupplyNew);
-    await expect(+lastTokenId + 1).eq(lastTokenIdNew);
-  });
-
-  it("burnAndMintNewPolymorph mints polymorph with the same gene", async () => {
-    const PolymorphRoot = await ethers.getContractFactory("PolymorphRoot");
-    v1Instance = await PolymorphRoot.deploy(constructorArgs);
-    constructorArgs["_polymorphV1Address"] = v1Instance.address;
-    v2Instance = await PolymorphRoot.deploy(constructorArgs);
-    const bulkBuyCount = 3;
-    const burnTokenId = 2;
-
-    await v1Instance.bulkBuy(bulkBuyCount, {
-      value: polymorphPrice.mul(bulkBuyCount),
-    });
-    const geneOf = await v1Instance.geneOf(burnTokenId);
-
-    await v1Instance.approve(v2Instance.address, burnTokenId);
-    await v2Instance.burnAndMintNewPolymorph(burnTokenId);
-
-    const mintedId = await v2Instance.lastTokenId();
-    const newGeneOf = await v2Instance.geneOf(mintedId);
-
-    await expect(geneOf).eq(newGeneOf);
   });
 
   it(`should not mint more than totalSupply`, async () => {

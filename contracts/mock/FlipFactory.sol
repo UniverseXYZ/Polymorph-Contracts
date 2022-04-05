@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity 0.8.13;
 
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/utils/Create2.sol";
@@ -21,7 +21,6 @@ contract FlipFactory is ERC721Holder {
             bytes32(0),
             keccak256(bytecode)
         );
-        console.log(msg.sender, polymorph.ownerOf(morphId));
         polymorph.safeTransferFrom(msg.sender, expectedAddress, morphId);
         _bytecode = bytecode;
         search(limit);
@@ -47,7 +46,6 @@ contract FlipFactory is ERC721Holder {
             );
             tries++;
         }
-        console.log(success, "Tries: ", tries);
         require(success, "Unsuccessful search");
     }
 }

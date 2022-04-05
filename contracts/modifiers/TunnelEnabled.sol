@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity 0.8.13;
 
 abstract contract TunnelEnabled {
     mapping(address => bool) public whitelistTunnelAddresses;

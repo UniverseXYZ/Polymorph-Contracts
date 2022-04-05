@@ -13,7 +13,7 @@ describe('Gene Flipper', () => {
     let token = "POLY";
     let baseUri = "http://www.kekdao.com/";
     let premintedTokensCount = 5;
-    let totalSupply = 20;
+    let totalSupply = 10000;
     let bulkBuyLimit = 20;
     let polymorphPrice = ethers.utils.parseEther("0.0777");
     let defaultGenomeChangePrice = ethers.utils.parseEther("0.01");
@@ -52,6 +52,10 @@ describe('Gene Flipper', () => {
       const FlipFactory = await ethers.getContractFactory("FlipFactory");
       flipFactory = await FlipFactory.deploy();
       console.log(`Flip factory deployed to: ${flipFactory.address}`);
+
+      const daoVotedSupply = 10100;
+
+		  await polymorphInstance.connect(dao).setMaxSupply(daoVotedSupply);
 
     });
 

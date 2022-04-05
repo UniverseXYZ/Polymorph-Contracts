@@ -8,13 +8,13 @@ describe("ERC721Consumable", async () => {
     let consumer;
 	let snapshotId;
     let bulkBuyCount;
-	let tokenID = 0;
+	let tokenID = 10000;
     
     let name = "ConsumablePolymorph";
     let token = "POLY";
     let baseUri = "http://www.kekdao.com/";
     let premintedTokensCount = 0;
-    let totalSupply = 20;
+    let totalSupply = 10000;
     let bulkBuyLimit = 20;
     let polymorphPrice = ethers.utils.parseEther("0.0777");
     let defaultGenomeChangePrice = ethers.utils.parseEther("0.01");
@@ -50,6 +50,10 @@ describe("ERC721Consumable", async () => {
         polymorphInstance = await PolymorphRoot.deploy(constructorArgs);
       
         console.log(`Polymorph instance deployed to: ${polymorphInstance.address}`);
+
+		const daoVotedSupply = 10100;
+
+		await polymorphInstance.connect(approved).setMaxSupply(daoVotedSupply);
 
         bulkBuyCount = 10;
         const cost = await polymorphInstance.polymorphPrice();
@@ -155,7 +159,7 @@ describe("ERC721Consumable", async () => {
 	})
 
 	it('should not be able to transfer from consumer', async () => {
-        const transferFromTokenId = 5;
+        const transferFromTokenId = 10005; // should be one of the approved tokens
 		const expectedRevertMessage = 'ERC721: transfer caller is not owner nor approved';
 		await polymorphInstance.changeConsumer(consumer.address, transferFromTokenId);
 		await expect(polymorphInstance.connect(consumer).transferFrom(owner.address, other.address, transferFromTokenId))

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.13;
 
-import "./IPolymorphRoot.sol";
+import "../mainnet/IPolymorphRoot.sol";
 import "../base/Polymorph.sol";
 import "../base/PolymorphWithGeneChanger.sol";
 
-contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
+contract PolymorphV1 is PolymorphWithGeneChanger, IPolymorphRoot {
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
 
     struct Params {
@@ -29,8 +29,6 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
 
     Polymorph public polymorphV1Contract;
     uint256 public totalBurnedV1;
-
-    uint16 constant private STARTING_TOKEN_ID = 10000;
 
     event PolymorphPriceChanged(uint256 newPolymorphPrice);
     event MaxSupplyChanged(uint256 newMaxSupply);
@@ -56,14 +54,12 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
         polymorphV1Contract = Polymorph(params._polymorphV1Address);
         geneGenerator.random();
 
-        _tokenId = _tokenId + STARTING_TOKEN_ID;
-
         _preMint(params.premintedTokensCount);
     }
 
     function _preMint(uint256 amountToMint) internal {
         for (uint256 i = 0; i < amountToMint; i++) {
-            _tokenId++;
+            _tokenId += 1;
             _genes[_tokenId] = geneGenerator.random();
             _mint(_msgSender(), _tokenId);
         }
@@ -72,7 +68,7 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
     function mint() public payable override nonReentrant {
         require(_tokenId < maxSupply, "Total supply reached");
 
-        _tokenId++;
+        _tokenId += 1;
 
         _genes[_tokenId] = geneGenerator.random();
 
@@ -104,25 +100,6 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
         );
     }
 
-    function burnAndMintNewPolymorph(uint256[] calldata tokenIds) external nonReentrant {
-        for(uint256 i = 0; i < tokenIds.length; i++) {
-            uint256 currentIdToBurnAndMint = tokenIds[i];
-            require(_msgSender() == polymorphV1Contract.ownerOf(currentIdToBurnAndMint));
-
-            uint256 geneToTransfer = polymorphV1Contract.geneOf(currentIdToBurnAndMint);
-            polymorphV1Contract.burn(currentIdToBurnAndMint);
-
-            totalBurnedV1++;
-
-            _genes[currentIdToBurnAndMint] = geneToTransfer;
-
-            _mint(_msgSender(), currentIdToBurnAndMint);
-
-            emit TokenMinted(currentIdToBurnAndMint, _genes[currentIdToBurnAndMint]);
-            emit TokenBurnedAndMinted(currentIdToBurnAndMint, _genes[currentIdToBurnAndMint]);
-        }
-    }
-
     function bulkBuy(uint256 amount) public payable override nonReentrant {
         require(
             amount <= bulkBuyLimit,
@@ -150,7 +127,7 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
         }
 
         for (uint256 i = 0; i < amount; i++) {
-            _tokenId++;
+            _tokenId += 1;
 
             _genes[_tokenId] = geneGenerator.random();
             _mint(_msgSender(), _tokenId);
