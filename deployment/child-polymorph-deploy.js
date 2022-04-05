@@ -19,7 +19,7 @@ async function PolymorphDeploy() {
   const metadataURI =
     "https://us-central1-polymorphmetadata.cloudfunctions.net/images-function?id=";
   const DAOAddress = "0x8FcE67537676879Bc5a1B86B403400E1614Bfce6";
-  const maticWETHAddress = "0xa2D7431aA391d1814516449b32B01735590fdec1";
+  const maticWETHAddress = "0x4Fb90bc32709d73A5E745B56708C84A6Ad7Ab5C9";
   const geneChangePrice = ethers.utils.parseEther("0.001");
   const randomizePrice = ethers.utils.parseEther("0.001");
   const arweaveContainer =
