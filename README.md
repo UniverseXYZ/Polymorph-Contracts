@@ -41,6 +41,8 @@ Randomization of the genome is based on generating a hash. The seed for this has
 - blockhash(block.number) - the hash of the current block
 - blockhash(block.number-100) - the hash of the block 100 blocks ago.
 
+- Note: The random generated genome is `77` digits long. However, sometimes this generator produces `76` instead of `77` digits. Can be observed on some V1 polymorphs.
+
 Theoretically it is possible for a miner to have a slightly bigger chance in generating a morph of his liking compared to a regular user. This risk, however is negligible for both economical and behavioral reasons. On one hand, the miner will likely be risking a significant block reward and the price of Polymorph needs to be sky high in order to make it worth the hassle. On the other hand, polymorph desirability and affinity is a very subjective matter - meaning that if they are going to like or dislike the new morph will depend on the person operating the mining node.
 
 ## Changing single gene
