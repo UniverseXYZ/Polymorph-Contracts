@@ -296,6 +296,24 @@ describe("PolymorphRootOld", () => {
     ).revertedWith("Base character not morphable");
   });
 
+  it("should not randomize the base character", async () => {
+    const cost = await polymorphInstance.polymorphPrice();
+
+    await polymorphInstance["mint()"]({ value: cost });
+
+    const tokenId = await polymorphInstance.lastTokenId();
+
+    const baseChar = await polymorphInstance.geneOf(tokenId);
+
+    const scrambleCost = await polymorphInstance.randomizeGenomePrice();
+
+    await polymorphInstance.randomizeGenome(tokenId, {value: scrambleCost});
+
+    const baseCharAfterRandomization = await polymorphInstance.geneOf(tokenId);
+
+    await expect(baseChar.mod(100)).eq(baseCharAfterRandomization.mod(100));
+  });
+
   it("morph gene should return excess ether sent", async () => {
     const cost = await polymorphInstance.polymorphPrice();
 

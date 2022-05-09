@@ -6,7 +6,7 @@ describe("Polymorph Polygon Integration", () => {
   //Tunnel contrustor arguments
   const goerliFxChild = "0xCf73231F28B7331BBe3124B907840A94851f9f11";
 
-  let polymorphPrice = ethers.utils.parseEther("0.00777");
+  let polymorphPrice = ethers.utils.parseEther("0.0777");
 
   // Polymorph constructor arguments
   let name = "PolymorphChild";

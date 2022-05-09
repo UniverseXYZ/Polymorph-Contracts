@@ -106,9 +106,8 @@ abstract contract PolymorphWithGeneChanger is
             mod = genome % (10**(genePosition * 2)); // Each gene is 2 digits long
         }
 
-        uint256 div = genome / (10**((genePosition + 1) * 2)) * (
-            10**((genePosition + 1) * 2)
-        );
+        uint256 div = (genome / (10**((genePosition + 1) * 2))) *
+            (10**((genePosition + 1) * 2));
 
         uint256 insert = replacement * (10**(genePosition * 2));
         newGene = div + insert + mod;
@@ -142,6 +141,7 @@ abstract contract PolymorphWithGeneChanger is
 
         uint256 oldGene = _genes[tokenId];
         _genes[tokenId] = geneGenerator.random();
+        _genes[tokenId] = replaceGene(_genes[tokenId], oldGene % 100, 0); // additional step so that the base character is not changed after scrambling
         _genomeChanges[tokenId] = 0;
         isNotVirgin[tokenId] = true;
         emit TokenMorphed(
