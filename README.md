@@ -49,7 +49,7 @@ The holder of a Polymorph can decide to pay to change a single trait. The price 
 
 Gene positions:
 
-- 0 - base character. Will not be morphable. Dont pass it
+- 0 - base character. Will not be morphable nor be able to be scrambled. Dont pass it
 - 1 - background attribute
 - 2 - pants attribute
 - 3 - torso attribute
@@ -58,6 +58,9 @@ Gene positions:
 - 6 - head attribute
 - 7 - right weapon attribute
 - 8 - left weapon attribute
+
+- Note: Currently there are `8` attributes that correspond to digital pictures/pngs. However the contracts support up to `38` attributes (see `PolymorphWithGeneChanger` contract `TOTAL_ATTRIBUTES`) in case on a later stage a decision is made to add more.
+- If you pass a gene attribute greater than `8` when morphing, the genome will change but visually there won't be any difference to the polymorph. 
 
 ## Polygon Bridge
 

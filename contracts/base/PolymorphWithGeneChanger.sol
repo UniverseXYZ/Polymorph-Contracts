@@ -15,6 +15,8 @@ abstract contract PolymorphWithGeneChanger is
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
     using Address for address;
 
+    uint256 constant private TOTAL_ATTRIBUTES = 38;
+
     mapping(uint256 => uint256) internal _genomeChanges;
     mapping(uint256 => bool) public isNotVirgin;
     uint256 public baseGenomeChangePrice;
@@ -100,7 +102,7 @@ abstract contract PolymorphWithGeneChanger is
         uint256 replacement,
         uint256 genePosition
     ) internal pure virtual returns (uint256 newGene) {
-        require(genePosition < 38, "Bad gene position");
+        require(genePosition < TOTAL_ATTRIBUTES, "Bad gene position");
         uint256 mod = 0;
         if (genePosition > 0) {
             mod = genome % (10**(genePosition * 2)); // Each gene is 2 digits long
