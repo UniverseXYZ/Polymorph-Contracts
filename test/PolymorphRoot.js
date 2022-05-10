@@ -53,17 +53,21 @@ describe("PolymorphRootOld", () => {
 
     console.log(`Polymorph instance deployed to: ${polymorphInstance.address}`);
 
-		await polymorphInstance.connect(dao).setMaxSupply(daoVotedSupply);
+    await polymorphInstance.connect(dao).setMaxSupply(daoVotedSupply);
   });
 
   it(`first token id should be ${startTokenId + 1}`, async () => {
     const [user, dao] = await ethers.getSigners();
 
-    const PolymorphRootNoPremint = await ethers.getContractFactory("PolymorphRoot");
+    const PolymorphRootNoPremint = await ethers.getContractFactory(
+      "PolymorphRoot"
+    );
 
-    constructorArgs['premintedTokensCount'] = 0;
+    constructorArgs["premintedTokensCount"] = 0;
 
-    polymorphInstanceNoPremint = await PolymorphRootNoPremint.deploy(constructorArgs);
+    polymorphInstanceNoPremint = await PolymorphRootNoPremint.deploy(
+      constructorArgs
+    );
 
     await polymorphInstanceNoPremint.connect(dao).setMaxSupply(daoVotedSupply);
 
@@ -144,7 +148,11 @@ describe("PolymorphRootOld", () => {
     const bobsAddress = await bobsAccount.address;
 
     const geneBefore = await polymorphInstance.geneOf(startTokenId + 3);
-    await polymorphInstance.transferFrom(deployer.address, bobsAddress, startTokenId + 3);
+    await polymorphInstance.transferFrom(
+      deployer.address,
+      bobsAddress,
+      startTokenId + 3
+    );
     const geneAfter = await polymorphInstance.geneOf(startTokenId + 3);
 
     expect(geneBefore).eq(geneAfter, "The two genes ended up the same");
@@ -296,6 +304,44 @@ describe("PolymorphRootOld", () => {
     ).revertedWith("Base character not morphable");
   });
 
+  it("should not randomize the base character", async () => {
+    const cost = await polymorphInstance.polymorphPrice();
+
+    await polymorphInstance["mint()"]({ value: cost });
+
+    const tokenId = await polymorphInstance.lastTokenId();
+
+    const baseChar = await polymorphInstance.geneOf(tokenId);
+
+    const scrambleCost = await polymorphInstance.randomizeGenomePrice();
+
+    await polymorphInstance.randomizeGenome(tokenId, { value: scrambleCost });
+
+    const baseCharAfterRandomization = await polymorphInstance.geneOf(tokenId);
+
+    await expect(baseChar.mod(100)).eq(baseCharAfterRandomization.mod(100));
+  });
+
+  it("genome should be the same length after randomization", async () => { // May fail sometimes. See the Note in README##Genome
+    const cost = await polymorphInstance.polymorphPrice();
+
+    await polymorphInstance.bulkBuy(4, { value: cost.mul(4) });
+
+    const tokenId = await polymorphInstance.lastTokenId();
+
+    const scrambleCost = await polymorphInstance.randomizeGenomePrice();
+
+    const geneOfToken = (await polymorphInstance.geneOf(tokenId)).toString();
+
+    await polymorphInstance.randomizeGenome(tokenId, { value: scrambleCost });
+
+    const geneOfTokenAfterRandomization = (
+      await polymorphInstance.geneOf(tokenId)
+    ).toString();
+
+    await expect(geneOfToken.length).eq(geneOfTokenAfterRandomization.length);
+  });
+
   it("morph gene should return excess ether sent", async () => {
     const cost = await polymorphInstance.polymorphPrice();
 
@@ -373,7 +419,7 @@ describe("PolymorphRootOld", () => {
     const MockedPolymorphRoot = await ethers.getContractFactory(
       "PolymorphRoot"
     );
-  
+
     const mockedPolymorphInstance = await MockedPolymorphRoot.deploy({
       name: name,
       symbol: token,
@@ -423,24 +469,25 @@ describe("PolymorphRootOld", () => {
       "PolymorphRoot"
     );
     const mockedPolymorphInstance = await MockedPolymorphRoot.deploy({
-        name: name,
-        symbol: token,
-        baseURI: baseUri,
-        _daoAddress: contractInteractor.address,
-        premintedTokensCount: premintedTokensCount,
-        _baseGenomeChangePrice: defaultGenomeChangePrice,
-        _polymorphPrice: polymorphPrice,
-        _maxSupply: daoVotedSupply,
-        _randomizeGenomePrice: randomizeGenomePrice,
-        _bulkBuyLimit: bulkBuyLimit,
-        _arweaveAssetsJSON: arweaveAssetsJSON,
-        _polymorphV1Address: polymorphV1Address,
-      }
-    );
+      name: name,
+      symbol: token,
+      baseURI: baseUri,
+      _daoAddress: contractInteractor.address,
+      premintedTokensCount: premintedTokensCount,
+      _baseGenomeChangePrice: defaultGenomeChangePrice,
+      _polymorphPrice: polymorphPrice,
+      _maxSupply: daoVotedSupply,
+      _randomizeGenomePrice: randomizeGenomePrice,
+      _bulkBuyLimit: bulkBuyLimit,
+      _arweaveAssetsJSON: arweaveAssetsJSON,
+      _polymorphV1Address: polymorphV1Address,
+    });
 
     const cost = await mockedPolymorphInstance.polymorphPrice();
     await expect(
-      mockedPolymorphInstance.randomizeGenome(startTokenId + premintedTokensCount)
+      mockedPolymorphInstance.randomizeGenome(
+        startTokenId + premintedTokensCount
+      )
     ).revertedWith(
       "Address: unable to send value, recipient may have reverted"
     );
