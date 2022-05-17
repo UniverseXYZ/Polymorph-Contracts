@@ -55,6 +55,9 @@ describe("PolymorphRootBurnAndMint", () => {
 
     const PolymorphV1 = await ethers.getContractFactory("PolymorphV1");
 
+    const accounts = await ethers.getSigners();
+    const deployerAddr = accounts[0].address;
+
     v1Instance = await PolymorphV1.deploy(constructorArgs);
 
     constructorArgs["_polymorphV1Address"] = v1Instance.address;
@@ -66,7 +69,7 @@ describe("PolymorphRootBurnAndMint", () => {
       value: polymorphPrice.mul(bulkBuyCount),
     });
 
-    const totalBurned = await v2Instance.totalBurnedV1();
+    const burnCount = await v2Instance.burnCount(deployerAddr);
 
     const tokensToBurn = [1, 3, 5];
     const tokensToBurnArrLen = 3;
@@ -77,9 +80,9 @@ describe("PolymorphRootBurnAndMint", () => {
  
     await v2Instance.burnAndMintNewPolymorph(tokensToBurn);
 
-    const totalBurnedNew = await v2Instance.totalBurnedV1();
+    const burnCountNew = await v2Instance.burnCount(deployerAddr);
 
-    await expect(+totalBurned + tokensToBurnArrLen).eq(totalBurnedNew);
+    await expect(+burnCount + tokensToBurnArrLen).eq(burnCountNew);
   });
 
   it("burnAndMintNewPolymorph preserves the newly minted polymorphs he same id and genome", async () => {

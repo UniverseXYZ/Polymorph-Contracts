@@ -28,7 +28,7 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
     uint256 public bulkBuyLimit;
 
     Polymorph public polymorphV1Contract;
-    uint256 public totalBurnedV1;
+    mapping(address => uint256) public burnCount;
 
     uint16 constant private STARTING_TOKEN_ID = 10000;
 
@@ -112,7 +112,7 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
             uint256 geneToTransfer = polymorphV1Contract.geneOf(currentIdToBurnAndMint);
             polymorphV1Contract.burn(currentIdToBurnAndMint);
 
-            totalBurnedV1++;
+            burnCount[_msgSender()]+=1;
 
             _genes[currentIdToBurnAndMint] = geneToTransfer;
 
