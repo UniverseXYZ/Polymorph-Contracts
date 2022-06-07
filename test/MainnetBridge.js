@@ -12,7 +12,7 @@ describe('Polymorph Mainnet Integration', () => {
   let baseUri = "";
   let polymorphV1Address = "0x75D38741878da8520d1Ae6db298A9BD994A5D241";
   let defaultGenomeChangePrice = ethers.utils.parseEther("0.01");
-  let premintedTokensCount = 0;
+  let royaltyFee = 0;
   let polymorphPrice = ethers.utils.parseEther("0.0777");
   let totalSupply = 10000;
   let randomizeGenomePrice = ethers.utils.parseEther("0.01");
@@ -29,7 +29,7 @@ describe('Polymorph Mainnet Integration', () => {
       symbol: token,
       baseURI: baseUri,
       _daoAddress: dao.address,
-      premintedTokensCount: premintedTokensCount,
+      _royaltyFee: royaltyFee,
       _baseGenomeChangePrice: defaultGenomeChangePrice,
       _polymorphPrice: polymorphPrice,
       _maxSupply: totalSupply,

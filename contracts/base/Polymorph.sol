@@ -2,6 +2,7 @@
 pragma solidity 0.8.13;
 import "./IPolymorph.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "../base/ERC721PresetMinterPauserAutoId.sol";
 import "../lib/PolymorphGeneGenerator.sol";
 import "../modifiers/DAOControlled.sol";
@@ -10,7 +11,8 @@ abstract contract Polymorph is
     IPolymorph,
     ERC721PresetMinterPauserAutoId,
     ReentrancyGuard,
-    DAOControlled
+    DAOControlled,
+    Ownable
 {
     using PolymorphGeneGenerator for PolymorphGeneGenerator.Gene;
 
