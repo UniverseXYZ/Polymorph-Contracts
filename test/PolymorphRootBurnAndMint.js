@@ -11,6 +11,7 @@ describe("PolymorphRootBurnAndMint", () => {
   let token = "POLY";
   let baseUri = "http://www.kekdao.com/";
   let premintedTokensCount = 0;
+  let royaltyFee = 0;
   let totalSupply = 10000;
   let bulkBuyLimit = 20;
   let polymorphPrice = ethers.utils.parseEther("0.0777");
@@ -20,6 +21,7 @@ describe("PolymorphRootBurnAndMint", () => {
   let polymorphV1Address = "0x75D38741878da8520d1Ae6db298A9BD994A5D241";
 
   let constructorArgs;
+  let constructorArgsV2;
 
   before(async () => {
     const [user, dao, alice, bob] = await ethers.getSigners();
@@ -43,9 +45,24 @@ describe("PolymorphRootBurnAndMint", () => {
       _arweaveAssetsJSON: arweaveAssetsJSON,
       _polymorphV1Address: polymorphV1Address,
     };
+
+    constructorArgsV2 = {
+      name: name,
+      symbol: token,
+      baseURI: baseUri,
+      _daoAddress: DAO.address,
+      _royaltyFee: royaltyFee,
+      _baseGenomeChangePrice: defaultGenomeChangePrice,
+      _polymorphPrice: polymorphPrice,
+      _maxSupply: totalSupply,
+      _randomizeGenomePrice: randomizeGenomePrice,
+      _bulkBuyLimit: bulkBuyLimit,
+      _arweaveAssetsJSON: arweaveAssetsJSON,
+      _polymorphV1Address: polymorphV1Address,
+    };
     
     const PolymorphRoot = await ethers.getContractFactory("PolymorphRoot");
-    polymorphInstance = await PolymorphRoot.deploy(constructorArgs);
+    polymorphInstance = await PolymorphRoot.deploy(constructorArgsV2);
 
     console.log(`Polymorph instance deployed to: ${polymorphInstance.address}`);
   });
@@ -60,9 +77,9 @@ describe("PolymorphRootBurnAndMint", () => {
 
     v1Instance = await PolymorphV1.deploy(constructorArgs);
 
-    constructorArgs["_polymorphV1Address"] = v1Instance.address;
+    constructorArgsV2["_polymorphV1Address"] = v1Instance.address;
 
-    v2Instance = await PolymorphRoot.deploy(constructorArgs);
+    v2Instance = await PolymorphRoot.deploy(constructorArgsV2);
     const bulkBuyCount = 5;
 
     await v1Instance.bulkBuy(bulkBuyCount, {
@@ -92,9 +109,9 @@ describe("PolymorphRootBurnAndMint", () => {
 
     v1Instance = await PolymorphV1.deploy(constructorArgs);
 
-    constructorArgs["_polymorphV1Address"] = v1Instance.address;
+    constructorArgsV2["_polymorphV1Address"] = v1Instance.address;
 
-    v2Instance = await PolymorphRoot.deploy(constructorArgs);
+    v2Instance = await PolymorphRoot.deploy(constructorArgsV2);
 
     const bulkBuyCount = 5;
 

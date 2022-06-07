@@ -19,7 +19,7 @@ async function PolymorphDeploy() {
   const metadataURI =
     "https://us-central1-polymorphmetadata.cloudfunctions.net/images-function?id=";
   const DAOAddress = "0x8FcE67537676879Bc5a1B86B403400E1614Bfce6";
-  const premint = 0;
+  const royaltyFee = 0;
   const geneChangePrice = ethers.utils.parseEther("0.01");
   const polymorphPrice = ethers.utils.parseEther("0.0777");
   const polymorphsLimit = 10000;
@@ -34,7 +34,7 @@ async function PolymorphDeploy() {
     symbol: tokenSymbol,
     baseURI: metadataURI,
     _daoAddress: DAOAddress,
-    premintedTokensCount: premint,
+    _royaltyFee: royaltyFee,
     _baseGenomeChangePrice: geneChangePrice,
     _polymorphPrice: polymorphPrice,
     _maxSupply: polymorphsLimit,

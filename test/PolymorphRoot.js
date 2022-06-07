@@ -10,7 +10,7 @@ describe("PolymorphRootOld", () => {
   let name = "PolymorphWithGeneChanger";
   let token = "POLY";
   let baseUri = "http://www.kekdao.com/";
-  let premintedTokensCount = 5;
+  let royaltyFee = 100;
   let totalSupply = 10000;
   let bulkBuyLimit = 20;
   let polymorphPrice = ethers.utils.parseEther("0.0777");
@@ -38,7 +38,7 @@ describe("PolymorphRootOld", () => {
       symbol: token,
       baseURI: baseUri,
       _daoAddress: DAO.address,
-      premintedTokensCount: premintedTokensCount,
+      _royaltyFee: royaltyFee,
       _baseGenomeChangePrice: defaultGenomeChangePrice,
       _polymorphPrice: polymorphPrice,
       _maxSupply: totalSupply,
@@ -63,8 +63,6 @@ describe("PolymorphRootOld", () => {
       "PolymorphRoot"
     );
 
-    constructorArgs["premintedTokensCount"] = 0;
-
     polymorphInstanceNoPremint = await PolymorphRootNoPremint.deploy(
       constructorArgs
     );
@@ -76,24 +74,6 @@ describe("PolymorphRootOld", () => {
     const lastToken = await polymorphInstanceNoPremint.lastTokenId();
 
     expect(lastToken).eq(startTokenId + 1);
-  });
-
-  it(`should premint ${premintedTokensCount} tokens`, async () => {
-    const lastToken = await polymorphInstance.lastTokenId();
-    const ownerOfTheFirstToken = await polymorphInstance.ownerOf(10001);
-
-    expect(deployer.address).eq(
-      ownerOfTheFirstToken,
-      "The preminted tokens were not given to the owner"
-    );
-
-    expect(lastToken - startTokenId).eq(
-      premintedTokensCount,
-      "The preminted tokens count is not accurate"
-    );
-
-    const geneOfLastToken = await polymorphInstance.geneOf(lastToken);
-    expect(geneOfLastToken).not.eq(0, "Gene hasn't been set");
   });
 
   it(`mint(address) should be disabled`, async () => {
@@ -108,7 +88,49 @@ describe("PolymorphRootOld", () => {
     await polymorphInstance.bulkBuy(bulkBuyCount, { value: cost.mul(20) });
     const lastTokenId = await polymorphInstance.lastTokenId();
 
-    expect(lastTokenId - startTokenId).eq(premintedTokensCount + bulkBuyCount);
+    expect(lastTokenId - startTokenId).eq(bulkBuyCount);
+  });
+
+  it(`should have owner`, async () => {
+    const ownerAddress = await polymorphInstance.owner()
+    expect(ownerAddress).eq(deployer.address);
+  });
+
+  it(`should transfer ownership`, async () => {
+    const initialOwnerAddress = await polymorphInstance.owner();
+    expect(initialOwnerAddress).eq(deployer.address);
+
+    await polymorphInstance.transferOwnership(DAO.address);
+
+    const newOwnerAddress = await polymorphInstance.owner();
+    expect(newOwnerAddress).eq(DAO.address);
+  });
+
+  it(`should have ERC2981 Default Royalties`, async () => {
+    const royaltyInfo = await polymorphInstance.royaltyInfo(1, 10000);
+
+    expect(royaltyInfo[0]).eq(DAO.address);
+    expect(royaltyInfo[1]).eq(royaltyFee);
+  });
+
+  it(`only DAO should update ERC2981 Default Royalties`, async () => {
+    const royaltyInfo = await polymorphInstance.royaltyInfo(1, 10000);
+
+    expect(royaltyInfo[0]).eq(DAO.address);
+    expect(royaltyInfo[1]).eq(royaltyFee);
+
+    await expect(
+      polymorphInstance.setDefaultRoyalty(deployer.address, 200)
+    ).revertedWith("Not called from the dao");
+
+    await expect(
+      polymorphInstance.connect(DAO).setDefaultRoyalty(deployer.address, 200)
+    ).to.be.emit(polymorphInstance, "DefaultRoyaltyChanged");
+
+    const newRoyaltyInfo = await polymorphInstance.royaltyInfo(1, 10000);
+
+    expect(newRoyaltyInfo[0]).eq(deployer.address);
+    expect(newRoyaltyInfo[1]).eq(200);
   });
 
   it(`transfer calls mint functionality`, async () => {
@@ -325,7 +347,7 @@ describe("PolymorphRootOld", () => {
   it("genome should be the same length after randomization", async () => { // May fail sometimes. See the Note in README##Genome
     const cost = await polymorphInstance.polymorphPrice();
 
-    await polymorphInstance.bulkBuy(4, { value: cost.mul(4) });
+    await polymorphInstance.bulkBuy(5, { value: cost.mul(5) });
 
     const tokenId = await polymorphInstance.lastTokenId();
 
@@ -374,10 +396,10 @@ describe("PolymorphRootOld", () => {
       symbol: token,
       baseURI: baseUri,
       _daoAddress: contractInteractor.address,
-      premintedTokensCount: premintedTokensCount,
+      _royaltyFee: royaltyFee,
       _baseGenomeChangePrice: defaultGenomeChangePrice,
       _polymorphPrice: polymorphPrice,
-      _maxSupply: totalSupply,
+      _maxSupply: daoVotedSupply,
       _randomizeGenomePrice: randomizeGenomePrice,
       _bulkBuyLimit: bulkBuyLimit,
       _arweaveAssetsJSON: arweaveAssetsJSON,
@@ -386,9 +408,9 @@ describe("PolymorphRootOld", () => {
 
     const cost = await mockedPolymorphInstance.polymorphPrice();
     await expect(
-      mockedPolymorphInstance.morphGene(startTokenId + premintedTokensCount, 2)
+      mockedPolymorphInstance.morphGene(startTokenId, 2)
     ).revertedWith(
-      "Address: unable to send value, recipient may have reverted"
+      "ERC721: owner query for nonexistent token"
     );
   });
 
@@ -425,7 +447,7 @@ describe("PolymorphRootOld", () => {
       symbol: token,
       baseURI: baseUri,
       _daoAddress: contractInteractor.address,
-      premintedTokensCount: premintedTokensCount,
+      _royaltyFee: royaltyFee,
       _baseGenomeChangePrice: defaultGenomeChangePrice,
       _polymorphPrice: polymorphPrice,
       _maxSupply: daoVotedSupply,
@@ -473,7 +495,7 @@ describe("PolymorphRootOld", () => {
       symbol: token,
       baseURI: baseUri,
       _daoAddress: contractInteractor.address,
-      premintedTokensCount: premintedTokensCount,
+      _royaltyFee: royaltyFee,
       _baseGenomeChangePrice: defaultGenomeChangePrice,
       _polymorphPrice: polymorphPrice,
       _maxSupply: daoVotedSupply,
@@ -486,10 +508,10 @@ describe("PolymorphRootOld", () => {
     const cost = await mockedPolymorphInstance.polymorphPrice();
     await expect(
       mockedPolymorphInstance.randomizeGenome(
-        startTokenId + premintedTokensCount
+        startTokenId
       )
     ).revertedWith(
-      "Address: unable to send value, recipient may have reverted"
+      "ERC721: owner query for nonexistent token"
     );
   });
 
@@ -510,7 +532,7 @@ describe("PolymorphRootOld", () => {
       symbol: token,
       baseURI: baseUri,
       _daoAddress: contractInteractor.address,
-      premintedTokensCount: premintedTokensCount,
+      _royaltyFee: royaltyFee,
       _baseGenomeChangePrice: defaultGenomeChangePrice,
       _polymorphPrice: polymorphPrice,
       _maxSupply: daoVotedSupply,

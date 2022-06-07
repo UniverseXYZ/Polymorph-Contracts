@@ -13,7 +13,7 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
         string symbol;
         string baseURI;
         address payable _daoAddress;
-        uint256 premintedTokensCount;
+        uint96 _royaltyFee;
         uint256 _baseGenomeChangePrice;
         uint256 _polymorphPrice;
         uint256 _maxSupply;
@@ -35,6 +35,7 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
     event PolymorphPriceChanged(uint256 newPolymorphPrice);
     event MaxSupplyChanged(uint256 newMaxSupply);
     event BulkBuyLimitChanged(uint256 newBulkBuyLimit);
+    event DefaultRoyaltyChanged(address newReceiver, uint96 newDefaultRoyalty);
 
     constructor(Params memory params)
         PolymorphWithGeneChanger(
@@ -58,15 +59,8 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
 
         _tokenId = _tokenId + STARTING_TOKEN_ID;
 
-        _preMint(params.premintedTokensCount);
-    }
+        _setDefaultRoyalty(params._daoAddress, params._royaltyFee);
 
-    function _preMint(uint256 amountToMint) internal {
-        for (uint256 i = 0; i < amountToMint; i++) {
-            _tokenId++;
-            _genes[_tokenId] = geneGenerator.random();
-            _mint(_msgSender(), _tokenId);
-        }
     }
 
     function mint() public payable override nonReentrant {
@@ -200,6 +194,15 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
         bulkBuyLimit = _bulkBuyLimit;
 
         emit BulkBuyLimitChanged(_bulkBuyLimit);
+    }
+
+    function setDefaultRoyalty(address receiver, uint96 royaltyFee)
+        external
+        onlyDAO
+    {
+        _setDefaultRoyalty(receiver, royaltyFee);
+
+        emit DefaultRoyaltyChanged(receiver, royaltyFee);
     }
 
     receive() external payable {

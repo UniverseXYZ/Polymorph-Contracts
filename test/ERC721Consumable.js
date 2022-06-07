@@ -13,7 +13,7 @@ describe("ERC721Consumable", async () => {
     let name = "ConsumablePolymorph";
     let token = "POLY";
     let baseUri = "http://www.kekdao.com/";
-    let premintedTokensCount = 0;
+    let royaltyFee = 0;
     let totalSupply = 10000;
     let bulkBuyLimit = 20;
     let polymorphPrice = ethers.utils.parseEther("0.0777");
@@ -36,7 +36,7 @@ describe("ERC721Consumable", async () => {
             symbol: token,
             baseURI: baseUri,
             _daoAddress: approved.address,
-            premintedTokensCount: premintedTokensCount,
+            _royaltyFee: royaltyFee,
             _baseGenomeChangePrice: defaultGenomeChangePrice,
             _polymorphPrice: polymorphPrice,
             _maxSupply: totalSupply,
