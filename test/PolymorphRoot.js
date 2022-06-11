@@ -331,7 +331,7 @@ describe("PolymorphRootOld", () => {
   it("genome should be the same length after randomization", async () => { // May fail sometimes. See the Note in README##Genome
     const cost = await polymorphInstance.polymorphPrice();
 
-    await polymorphInstance.bulkBuy(10, { value: cost.mul(10) });
+    await polymorphInstance.bulkBuy(20, { value: cost.mul(20) });
 
     const tokenId = await polymorphInstance.lastTokenId();
 

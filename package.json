@@ -4,7 +4,12 @@
   "description": "This is the default package.json generated for your project",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "compile": "npx hardhat compile",
+    "deploy": "npx hardhat deploy --network",
+    "deploy-script": "npx hardhat run scripts/deploy.js --network",
+    "etherscan-verify": "npx hardhat verify --network",
+    "test": "npx hardhat test",
+    "export": "npx hardhat deploy --export-all ./deployments/contracts.json"
   },
   "author": "",
   "license": "ISC",
