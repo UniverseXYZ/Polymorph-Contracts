@@ -53,7 +53,6 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
 
         bulkBuyLimit = params._bulkBuyLimit;
 
-        arweaveAssetsJSON = params._arweaveAssetsJSON;
         polymorphV1Contract = Polymorph(params._polymorphV1Address);
         geneGenerator.random();
 
@@ -65,10 +64,12 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
 
     function mint() public payable override nonReentrant {
         require(_tokenId < maxSupply, "Total supply reached");
+        require(msg.value >= polymorphPrice, "Insufficient funds");
 
         _tokenId++;
 
         _genes[_tokenId] = geneGenerator.random();
+        _mint(_msgSender(), _tokenId);
 
         (bool transferToDaoStatus, ) = daoAddress.call{value: polymorphPrice}(
             ""
@@ -77,16 +78,6 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
             transferToDaoStatus,
             "Address: unable to send value, recipient may have reverted"
         );
-
-        uint256 excessAmount = msg.value - polymorphPrice;
-        if (excessAmount > 0) {
-            (bool returnExcessStatus, ) = _msgSender().call{
-                value: excessAmount
-            }("");
-            require(returnExcessStatus, "Failed to return excess.");
-        }
-
-        _mint(_msgSender(), _tokenId);
 
         emit TokenMinted(_tokenId, _genes[_tokenId]);
         emit TokenMorphed(
@@ -126,22 +117,7 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
             _tokenId + amount <= maxSupply,
             "Total supply reached"
         );
-
-        (bool transferToDaoStatus, ) = daoAddress.call{
-            value: polymorphPrice * amount
-        }("");
-        require(
-            transferToDaoStatus,
-            "Address: unable to send value, recipient may have reverted"
-        );
-
-        uint256 excessAmount = msg.value - (polymorphPrice * amount);
-        if (excessAmount > 0) {
-            (bool returnExcessStatus, ) = _msgSender().call{
-                value: excessAmount
-            }("");
-            require(returnExcessStatus, "Failed to return excess.");
-        }
+        require(msg.value >= polymorphPrice * amount, "Insufficient funds");
 
         for (uint256 i = 0; i < amount; i++) {
             _tokenId++;
@@ -158,6 +134,14 @@ contract PolymorphRoot is PolymorphWithGeneChanger, IPolymorphRoot {
                 PolymorphEventType.MINT
             );
         }
+
+        (bool transferToDaoStatus, ) = daoAddress.call{
+            value: polymorphPrice * amount
+        }("");
+        require(
+            transferToDaoStatus,
+            "Address: unable to send value, recipient may have reverted"
+        );
     }
 
     function mint(address to)

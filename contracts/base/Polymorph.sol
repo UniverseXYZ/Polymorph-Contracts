@@ -32,7 +32,6 @@ abstract contract Polymorph is
         uint256 indexed tokenId,
         uint256 gene
     );
-    event BaseURIChanged(string baseURI);
     event ArweaveAssetsJSONChanged(string arweaveAssetsJSON);
 
     enum PolymorphEventType {
@@ -62,10 +61,6 @@ abstract contract Polymorph is
         returns (uint256 gene)
     {
         return _genes[tokenId];
-    }
-
-    function lastTokenId() public view override returns (uint256 tokenId) {
-        return _tokenId;
     }
 
     function _beforeTokenTransfer(

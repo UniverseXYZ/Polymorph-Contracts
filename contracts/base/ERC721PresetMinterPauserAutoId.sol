@@ -42,6 +42,8 @@ contract ERC721PresetMinterPauserAutoId is
 
     string private _baseTokenURI;
 
+    event BaseURIChanged(string baseURI);
+
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE`, `MINTER_ROLE` and `PAUSER_ROLE` to the
      * account that deploys the contract.
@@ -73,6 +75,10 @@ contract ERC721PresetMinterPauserAutoId is
 
     function baseURI() external view virtual returns (string memory) {
         return _baseURI();
+    }
+
+    function lastTokenId() public view virtual returns (uint256 tokenId) {
+        return _tokenId;
     }
 
     /**

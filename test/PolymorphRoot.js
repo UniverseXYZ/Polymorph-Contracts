@@ -180,22 +180,6 @@ describe("PolymorphRootOld", () => {
     expect(geneBefore).eq(geneAfter, "The two genes ended up the same");
   });
 
-  it("randomize gene should return excess ether sent", async () => {
-    const cost = await polymorphInstance.polymorphPrice();
-
-    await polymorphInstance.connect(aliceAccount)["mint()"]({ value: cost });
-
-    const tokenId = await polymorphInstance.lastTokenId();
-
-    const randomizeCost = await polymorphInstance.randomizeGenomePrice();
-
-    await expect(
-      await polymorphInstance
-        .connect(aliceAccount)
-        .randomizeGenome(tokenId, { value: randomizeCost.mul(5) })
-    ).to.changeEtherBalance(aliceAccount, randomizeCost.mul(-1));
-  });
-
   it("should evolve gene", async () => {
     const tokenIdForMorphing = startTokenId + 2;
     const kekBalanceBefore = await DAO.getBalance();
@@ -347,7 +331,7 @@ describe("PolymorphRootOld", () => {
   it("genome should be the same length after randomization", async () => { // May fail sometimes. See the Note in README##Genome
     const cost = await polymorphInstance.polymorphPrice();
 
-    await polymorphInstance.bulkBuy(5, { value: cost.mul(5) });
+    await polymorphInstance.bulkBuy(10, { value: cost.mul(10) });
 
     const tokenId = await polymorphInstance.lastTokenId();
 
@@ -362,22 +346,6 @@ describe("PolymorphRootOld", () => {
     ).toString();
 
     await expect(geneOfToken.length).eq(geneOfTokenAfterRandomization.length);
-  });
-
-  it("morph gene should return excess ether sent", async () => {
-    const cost = await polymorphInstance.polymorphPrice();
-
-    await polymorphInstance.connect(aliceAccount)["mint()"]({ value: cost });
-
-    const tokenId = await polymorphInstance.lastTokenId();
-
-    const morphCost = await polymorphInstance.priceForGenomeChange(tokenId);
-
-    await expect(
-      await polymorphInstance
-        .connect(aliceAccount)
-        .morphGene(tokenId, 2, { value: morphCost.mul(5) })
-    ).to.changeEtherBalance(aliceAccount, morphCost.mul(-1));
   });
 
   it("should not morph gene when DAO does not have receive or fallback function", async () => {
@@ -465,20 +433,6 @@ describe("PolymorphRootOld", () => {
     );
   });
 
-  it("should not mint when msg.sender can not receive excess eth amount back", async () => {
-    const TestContractInteractor = await ethers.getContractFactory(
-      "TestContractInteractor"
-    );
-    const contractInteractor = await TestContractInteractor.deploy(
-      polymorphInstance.address
-    );
-
-    const cost = await polymorphInstance.polymorphPrice();
-    await expect(
-      contractInteractor.triggerMint({ value: cost.mul(2) })
-    ).revertedWith("Failed to return excess");
-  });
-
   it("should not randomize gene when DAO does not have receive or fallback function", async () => {
     const TestContractInteractor = await ethers.getContractFactory(
       "TestContractInteractor"
@@ -548,20 +502,6 @@ describe("PolymorphRootOld", () => {
     ).revertedWith(
       "Address: unable to send value, recipient may have reverted"
     );
-  });
-
-  it("should not bulk buy when msg.sender can not receive excess eth amount back", async () => {
-    const TestContractInteractor = await ethers.getContractFactory(
-      "TestContractInteractor"
-    );
-    const contractInteractor = await TestContractInteractor.deploy(
-      polymorphInstance.address
-    );
-
-    const cost = await polymorphInstance.polymorphPrice();
-    await expect(
-      contractInteractor.triggerBulkBuy(2, { value: cost.mul(4) })
-    ).revertedWith("Failed to return excess");
   });
 
   it("should change bulk buy limit", async () => {

@@ -69,19 +69,7 @@ abstract contract PolymorphWithGeneChanger is
         _beforeGenomeChange(tokenId);
         uint256 price = priceForGenomeChange(tokenId);
 
-        (bool transferToDaoStatus, ) = daoAddress.call{value: price}("");
-        require(
-            transferToDaoStatus,
-            "Address: unable to send value, recipient may have reverted"
-        );
-
-        uint256 excessAmount = msg.value - price;
-        if (excessAmount > 0) {
-            (bool returnExcessStatus, ) = _msgSender().call{
-                value: excessAmount
-            }("");
-            require(returnExcessStatus, "Failed to return excess.");
-        }
+        require(msg.value >= price, "Insufficient funds");
 
         uint256 oldGene = _genes[tokenId];
         uint256 newTrait = geneGenerator.random() % 100;
@@ -94,6 +82,12 @@ abstract contract PolymorphWithGeneChanger is
             _genes[tokenId],
             price,
             PolymorphEventType.MORPH
+        );
+
+        (bool transferToDaoStatus, ) = daoAddress.call{value: price}("");
+        require(
+            transferToDaoStatus,
+            "Address: unable to send value, recipient may have reverted"
         );
     }
 
@@ -125,21 +119,7 @@ abstract contract PolymorphWithGeneChanger is
     {
         _beforeGenomeChange(tokenId);
 
-        (bool transferToDaoStatus, ) = daoAddress.call{
-            value: randomizeGenomePrice
-        }("");
-        require(
-            transferToDaoStatus,
-            "Address: unable to send value, recipient may have reverted"
-        );
-
-        uint256 excessAmount = msg.value - randomizeGenomePrice;
-        if (excessAmount > 0) {
-            (bool returnExcessStatus, ) = _msgSender().call{
-                value: excessAmount
-            }("");
-            require(returnExcessStatus, "Failed to return excess.");
-        }
+        require(msg.value >= randomizeGenomePrice, "Insufficient funds");
 
         uint256 oldGene = _genes[tokenId];
         _genes[tokenId] = geneGenerator.random();
@@ -152,6 +132,14 @@ abstract contract PolymorphWithGeneChanger is
             _genes[tokenId],
             randomizeGenomePrice,
             PolymorphEventType.MORPH
+        );
+
+        (bool transferToDaoStatus, ) = daoAddress.call{
+            value: randomizeGenomePrice
+        }("");
+        require(
+            transferToDaoStatus,
+            "Address: unable to send value, recipient may have reverted"
         );
     }
 
