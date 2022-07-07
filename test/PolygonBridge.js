@@ -247,7 +247,7 @@ describe("Polymorph Polygon Integration", () => {
   it("moveThroughWormhole should revert if polymorph has not been approved for transfer", async () => {
     const [user, alice, bob] = await ethers.getSigners();
     await expect(
-      tunnelInstance.connect(bob).moveThroughWormhole(tokenId)
+      tunnelInstance.connect(bob).moveThroughWormhole([tokenId])
     ).to.be.revertedWith("ERC721Burnable: caller is not owner nor approved");
   });
 
@@ -256,7 +256,7 @@ describe("Polymorph Polygon Integration", () => {
     await polymorphInstance
       .connect(bob)
       .approve(tunnelInstance.address, tokenId);
-    await expect(tunnelInstance.connect(bob).moveThroughWormhole(tokenId)).to
+    await expect(tunnelInstance.connect(bob).moveThroughWormhole([tokenId])).to
       .not.be.reverted;
   });
 
@@ -265,7 +265,7 @@ describe("Polymorph Polygon Integration", () => {
     await polymorphInstance
       .connect(bob)
       .approve(tunnelInstance.address, tokenId);
-    await tunnelInstance.connect(bob).moveThroughWormhole(tokenId);
+    await tunnelInstance.connect(bob).moveThroughWormhole([tokenId]);
     await expect(polymorphInstance.ownerOf(tokenId)).to.be.revertedWith(
       "ERC721: owner query for nonexistent token"
     );
@@ -274,8 +274,8 @@ describe("Polymorph Polygon Integration", () => {
   it("moveThroughWormhole should revert if not called by polymorph owner", async () => {
     const [user, alice] = await ethers.getSigners();
     await expect(
-      tunnelInstance.connect(alice).moveThroughWormhole(tokenId)
-    ).revertedWith("Only owner can move polymorph");
+      tunnelInstance.connect(alice).moveThroughWormhole([tokenId])
+    ).revertedWith("Msg.sender should be the polymorph owner");
   });
 
 });

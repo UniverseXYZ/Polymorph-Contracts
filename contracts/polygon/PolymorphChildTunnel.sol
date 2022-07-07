@@ -16,14 +16,6 @@ contract PolymorphChildTunnel is FxBaseChildTunnel, PolymorphTunnel {
     address public latestRootMessageSender;
     bytes public latestData;
 
-    modifier onlyOwner(uint256 tokenId) {
-        require(
-            polymorphContract.ownerOf(tokenId) == msg.sender,
-            "Only owner can move polymorph"
-        );
-        _;
-    }
-
     function _processMessageFromRoot(
         uint256 stateId,
         address sender,
@@ -50,21 +42,33 @@ contract PolymorphChildTunnel is FxBaseChildTunnel, PolymorphTunnel {
         );
     }
 
-    function moveThroughWormhole(uint256 tokenId)
+    function moveThroughWormhole(uint256[] calldata _tokenIds)
         external
         override
-        onlyOwner(tokenId)
     {
-        uint256 gene = polymorphContract.geneOf(tokenId);
-        bool isNotVirgin = polymorphContract.isNotVirgin(tokenId);
-        uint256 genomeChanges = polymorphContract.genomeChanges(tokenId);
-        polymorphContract.burn(tokenId);
-
-        //TODO: Maybe clear gene and genomeChanges
-        // It may not be a problem because when we mint on polygon they will be overwritten
-        _sendMessageToRoot(
-            abi.encode(tokenId, msg.sender, gene, isNotVirgin, genomeChanges)
+        require(
+            _tokenIds.length <= 20,
+            "Trying to bulk bridge more than 20 polymorphs"
         );
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            require(polymorphContract.ownerOf(_tokenIds[i]) == msg.sender, "Msg.sender should be the polymorph owner");
+            uint256 gene = polymorphContract.geneOf(_tokenIds[i]);
+            bool isNotVirgin = polymorphContract.isNotVirgin(_tokenIds[i]);
+            uint256 genomeChanges = polymorphContract.genomeChanges(_tokenIds[i]);
+            polymorphContract.burn(_tokenIds[i]);
+
+            //TODO: Maybe clear gene and genomeChanges
+            // It may not be a problem because when we mint on polygon they will be overwritten
+            _sendMessageToRoot(
+                abi.encode(
+                    _tokenIds[i],
+                    msg.sender,
+                    gene,
+                    isNotVirgin,
+                    genomeChanges
+                )
+            );
+        }
     }
 
     function setPolymorphContract(address payable contractAddress)

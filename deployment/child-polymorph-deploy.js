@@ -18,7 +18,7 @@ async function PolymorphDeploy() {
   const tokenSymbol = "MORPH";
   const metadataURI =
     "https://us-central1-polymorphmetadata.cloudfunctions.net/images-function?id=";
-  const DAOAddress = "0x8FcE67537676879Bc5a1B86B403400E1614Bfce6";
+  const DAOAddress = "0x7e94e8D8c85960DBDC67E080C3D48D4e0BD423a6";
   const maticWETHAddress = "0x4Fb90bc32709d73A5E745B56708C84A6Ad7Ab5C9";
   const geneChangePrice = ethers.utils.parseEther("0.01");
   const randomizePrice = ethers.utils.parseEther("0.01");

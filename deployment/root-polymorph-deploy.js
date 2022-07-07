@@ -17,8 +17,8 @@ async function PolymorphDeploy() {
   const tokenName = "Polymorph";
   const tokenSymbol = "MORPH";
   const metadataURI =
-    "https://us-central1-polymorphmetadata.cloudfunctions.net/images-function?id=";
-  const DAOAddress = "0x8FcE67537676879Bc5a1B86B403400E1614Bfce6";
+    "https://us-central1-polymorphmetadata.cloudfunctions.net/images-function-test?id=";
+  const DAOAddress = "0x7e94e8D8c85960DBDC67E080C3D48D4e0BD423a6";
   const royaltyFee = 0;
   const geneChangePrice = ethers.utils.parseEther("0.01");
   const polymorphPrice = ethers.utils.parseEther("0.0777");
@@ -27,7 +27,7 @@ async function PolymorphDeploy() {
   const bulkBuyLimit = 20;
   const arweaveContainer =
     "https://arweave.net/5KDDRA5EE9p-Bw29ryB9Uz6SvMRNMCyXKkOzW_ZT9gA";
-  const polymorphV1Address = "0x665E3AD58e232cc8944C613D5e20c3A5C70A10ea";
+  const polymorphV1Address = "0x20951C5a7Ad50B9b9bC9202b4E32c9Deb2fD7b51";
 
   const constructorArgs = {
     name: tokenName,
