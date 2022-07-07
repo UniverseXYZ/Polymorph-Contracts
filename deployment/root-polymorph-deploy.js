@@ -15,7 +15,7 @@ async function PolymorphDeploy() {
   await printDeployerInfo();
 
   const tokenName = "Polymorph";
-  const tokenSymbol = "MORPH";
+  const tokenSymbol = "iMORPH";
   const metadataURI =
     "https://us-central1-polymorphmetadata.cloudfunctions.net/images-function-test?id=";
   const DAOAddress = "0x7e94e8D8c85960DBDC67E080C3D48D4e0BD423a6";
