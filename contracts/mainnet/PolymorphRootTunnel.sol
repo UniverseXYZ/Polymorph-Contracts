@@ -23,28 +23,44 @@ contract PolymorphRootTunnel is FxBaseRootTunnel, PolymorphTunnel {
             "Polymorph contract hasn't been set yet"
         );
         (
-            uint256 tokenId,
+            uint256[] memory tokenIds,
             address ownerAddress,
-            uint256 gene,
-            bool isNotVirgin,
-            uint256 genomeChanges
-        ) = _decodeMessage(data);
+            uint256[] memory genes,
+            bool[] memory isNotVirgin,
+            uint256[] memory genomeChanges
+        ) = _decodeMessageFromChild(data);
 
-        polymorphContract.transferFrom(address(this), ownerAddress, tokenId);
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            polymorphContract.transferFrom(
+                address(this),
+                ownerAddress,
+                tokenIds[i]
+            );
 
-        polymorphContract.wormholeUpdateGene(
-            tokenId,
-            gene,
-            isNotVirgin,
-            genomeChanges
-        );
+            polymorphContract.wormholeUpdateGene(
+                tokenIds[i],
+                genes[i],
+                isNotVirgin[i],
+                genomeChanges[i]
+            );
+        }
     }
 
     function moveThroughWormhole(uint256[] calldata _tokenIds) public override {
-        require(_tokenIds.length <= 20, "Trying to bulk bridge more than 20 polymorphs");
+        require(
+            _tokenIds.length <= 20,
+            "Trying to bulk bridge more than 20 polymorphs"
+        );
         for (uint256 i = 0; i < _tokenIds.length; i++) {
-            require(polymorphContract.ownerOf(_tokenIds[i]) == msg.sender, "Msg.sender should be the polymorph owner");
-            polymorphContract.transferFrom(msg.sender, address(this), _tokenIds[i]);
+            require(
+                polymorphContract.ownerOf(_tokenIds[i]) == msg.sender,
+                "Msg.sender should be the polymorph owner"
+            );
+            polymorphContract.transferFrom(
+                msg.sender,
+                address(this),
+                _tokenIds[i]
+            );
 
             _sendMessageToChild(
                 abi.encode(

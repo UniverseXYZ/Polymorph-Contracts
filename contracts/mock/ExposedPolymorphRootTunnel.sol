@@ -15,14 +15,14 @@ contract ExposedPolymorphRootTunnel is PolymorphRootTunnel {
         public
         pure
         returns (
-            uint256 tokenId,
+            uint256[] memory tokenIds,
             address polymorphAddress,
-            uint256 gene,
-            bool isVirgin,
-            uint256 genomeChanges
+            uint256[] memory genes,
+            bool[] memory isVirgin,
+            uint256[] memory genomeChanges
         )
     {
-        return _decodeMessage(data);
+        return _decodeMessageFromChild(data);
     }
 
     function processMessageFromChild(bytes memory data) public {

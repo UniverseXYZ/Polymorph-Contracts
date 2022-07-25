@@ -31,7 +31,7 @@ contract PolymorphChildTunnel is FxBaseChildTunnel, PolymorphTunnel {
             uint256 gene,
             bool isVirgin,
             uint256 genomeChanges
-        ) = _decodeMessage(data);
+        ) = _decodeMessageFromRoot(data);
         //TODO: Maybe check if person has enough MATIC tokens before that?
         polymorphContract.mintPolymorphWithInfo(tokenId, ownerAddress, gene);
         polymorphContract.wormholeUpdateGene(
@@ -46,29 +46,36 @@ contract PolymorphChildTunnel is FxBaseChildTunnel, PolymorphTunnel {
         external
         override
     {
-        require(
-            _tokenIds.length <= 20,
-            "Trying to bulk bridge more than 20 polymorphs"
-        );
-        for (uint256 i = 0; i < _tokenIds.length; i++) {
-            require(polymorphContract.ownerOf(_tokenIds[i]) == msg.sender, "Msg.sender should be the polymorph owner");
-            uint256 gene = polymorphContract.geneOf(_tokenIds[i]);
-            bool isNotVirgin = polymorphContract.isNotVirgin(_tokenIds[i]);
-            uint256 genomeChanges = polymorphContract.genomeChanges(_tokenIds[i]);
+        uint256 tokensLen = _tokenIds.length;
+        require(tokensLen <= 20, "Trying to bridge more than 20 tokens");
+        uint256[] memory genesArray = new uint256[](tokensLen);
+        uint256[] memory genomeChangesArray = new uint256[](tokensLen);
+        bool[] memory virginityInfoArray = new bool[](tokensLen);
+
+        for (uint256 i = 0; i < tokensLen; i++) {
+            require(
+                polymorphContract.ownerOf(_tokenIds[i]) == msg.sender,
+                "Msg.sender should be the polymorph owner"
+            );
+            genesArray[i] = polymorphContract.geneOf(_tokenIds[i]);
+            virginityInfoArray[i] = polymorphContract.isNotVirgin(_tokenIds[i]);
+            genomeChangesArray[i] = polymorphContract.genomeChanges(
+                _tokenIds[i]
+            );
             polymorphContract.burn(_tokenIds[i]);
 
             //TODO: Maybe clear gene and genomeChanges
             // It may not be a problem because when we mint on polygon they will be overwritten
-            _sendMessageToRoot(
-                abi.encode(
-                    _tokenIds[i],
-                    msg.sender,
-                    gene,
-                    isNotVirgin,
-                    genomeChanges
-                )
-            );
         }
+        _sendMessageToRoot(
+            abi.encode(
+                _tokenIds,
+                msg.sender,
+                genesArray,
+                virginityInfoArray,
+                genomeChangesArray
+            )
+        );
     }
 
     function setPolymorphContract(address payable contractAddress)

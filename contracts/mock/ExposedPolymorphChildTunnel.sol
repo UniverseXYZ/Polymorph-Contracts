@@ -19,7 +19,7 @@ contract ExposedPolymorphChildTunnel is PolymorphChildTunnel {
             uint256 genomeChanges
         )
     {
-        return _decodeMessage(data);
+        return _decodeMessageFromRoot(data);
     }
 
     function exposedProcessMessageFromRoot(
