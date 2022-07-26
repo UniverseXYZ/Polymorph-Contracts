@@ -6,7 +6,21 @@ import "../modifiers/DAOControlled.sol";
 abstract contract PolymorphTunnel is DAOControlled, IPolymorphsTunnel {
     constructor(address payable _daoAddress) DAOControlled(_daoAddress) {}
 
-    function _decodeMessage(bytes memory data)
+    function _decodeMessageFromChild(bytes memory data)
+        internal
+        pure
+        returns (
+            uint256[] memory tokenIds,
+            address ownerAddress,
+            uint256[] memory genes,
+            bool[] memory isNotVirgin,
+            uint256[] memory genomeChanges
+        )
+    {
+        return abi.decode(data, (uint256[], address, uint256[], bool[], uint256[]));
+    }
+
+    function _decodeMessageFromRoot(bytes memory data)
         internal
         pure
         returns (

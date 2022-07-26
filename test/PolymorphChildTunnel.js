@@ -9,9 +9,9 @@ describe('PolymorphChildTunnel', () => {
 
   before(async () => {
     const PolymorphRootTunnel = await ethers.getContractFactory("PolymorphChildTunnel");
-    const ExposedPolymorphRootTunnelContract = await ethers.getContractFactory("ExposedPolymorphChildTunnel");
+    const ExposedPolymorphChildTunnelContract = await ethers.getContractFactory("ExposedPolymorphChildTunnel");
     tunnelInstance = await PolymorphRootTunnel.deploy(goerliFxChild, daoAddress);
-    exposedTunnelInstance = await ExposedPolymorphRootTunnelContract.deploy(goerliFxChild, daoAddress);
+    exposedTunnelInstance = await ExposedPolymorphChildTunnelContract.deploy(goerliFxChild, daoAddress);
     console.log(`contract deployed to: ${tunnelInstance.address}`);
     console.log(`exposed contract deployed to: ${exposedTunnelInstance.address}`);
   });
@@ -22,18 +22,17 @@ describe('PolymorphChildTunnel', () => {
     let gene = "65097265087264340901236622123197376521531237462303307797553409679678212137362";
     let isVirgin = true;
     let genomeChanges = 5;
-    let genomeChangeCost = 7;
 
     // This encodes like solidity keccak256
     const keccak = ethers.utils.defaultAbiCoder.encode(
-      ["uint256", "address", "uint256", "bool", "uint256", "uint256"],
-      [tokenId, ownerAddress, gene, isVirgin, genomeChanges, genomeChangeCost]
+      ["uint256", "address", "uint256", "bool", "uint256"],
+      [tokenId, ownerAddress, gene, isVirgin, genomeChanges]
     );
     const result = await exposedTunnelInstance.decodeMessage(keccak);
     expect(result.tokenId.toNumber()).eq(tokenId);
     expect(result.polymorphAddress).eq(ownerAddress);
     expect(result.gene).eq(gene);
-    expect(result.isVirgin).eq(true);
+    expect(result.isVirgin).eq(isVirgin);
     expect(result.genomeChanges.toNumber()).eq(genomeChanges);
   });
 

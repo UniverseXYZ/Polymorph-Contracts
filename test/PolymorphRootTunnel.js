@@ -23,19 +23,18 @@ describe('PolymorphRootTunnel', () => {
     let gene = "65097265087264340901236622123197376521531237462303307797553409679678212137362";
     let isVirgin = true;
     let genomeChanges = 5;
-    let genomeChangeCost = 7;
 
     // This encodes like solidity keccak256
     const keccak = ethers.utils.defaultAbiCoder.encode(
-      ["uint256", "address", "uint256", "bool", "uint256", "uint256"],
-      [tokenId, ownerAddress, gene, isVirgin, genomeChanges, genomeChangeCost]
+      ["uint256[]", "address", "uint256[]", "bool[]", "uint256[]"],
+      [[tokenId], ownerAddress, [gene], [isVirgin], [genomeChanges]]
     );
     const result = await exposedTunnelInstance.decodeMessage(keccak);
-    expect(result.tokenId.toNumber()).eq(tokenId);
+    expect(result.tokenIds[0].toNumber()).eq(tokenId);
     expect(result.polymorphAddress).eq(ownerAddress);
-    expect(result.gene).eq(gene);
-    expect(result.isVirgin).eq(true);
-    expect(result.genomeChanges.toNumber()).eq(genomeChanges);
+    expect(result.genes[0]).eq(gene);
+    expect(result.isVirgin[0]).eq(true);
+    expect(result.genomeChanges[0].toNumber()).eq(genomeChanges);
   });
 
   it('_processMessageFromChild should revert if polymorph contract hasn not been set', async() => {

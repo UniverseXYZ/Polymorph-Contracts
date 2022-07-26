@@ -9,18 +9,20 @@ use(Web3ClientPlugin);
 const EVENT_SIGNATURE =
   "0x8c5261668696ce22758910d05bab8f186d6eb247ceac2af2e82c7dc17669b036";
 
-const parentProvider = new providers.JsonRpcProvider(
-  `https://goerli.infura.io/v3/${process.env.GOERLI_INFURA_KEY}`
-);
-
-const childProvider = new providers.JsonRpcProvider(
-  `https://polygon-mumbai.g.alchemy.com/v2/${process.env.MUMBAI_ALCHEMY_KEY}`
-);
-
 const TX_HASH_PARAM = process.argv.slice(2)[0];
 
 async function generateProof() {
   const posClient = new POSClient();
+
+  const parentProvider = new providers.JsonRpcProvider(
+    `https://goerli.infura.io/v3/e19f0faf4c34413da3ff6f806910dace`
+  );
+
+  console.log("Parent: ", parentProvider)
+  
+  const childProvider = new providers.JsonRpcProvider(
+    `https://polygon-mumbai.g.alchemy.com/v2/vJeprvW21K9qAMvlYrqkbtiHUoVQA1Ts`
+  );
 
   await posClient.init({
     log: true,

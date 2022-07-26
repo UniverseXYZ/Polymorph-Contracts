@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.14;
 
 import {RLPReader} from "../lib/RLPReader.sol";
 import {MerklePatriciaProof} from "../lib/MerklePatriciaProof.sol";
@@ -186,9 +186,16 @@ abstract contract FxBaseRootTunnel {
      *  8 - branchMask - 32 bits denoting the path of receipt in merkle tree
      *  9 - receiptLogIndex - Log Index to read from the receipt
      */
-    function receiveMessage(bytes memory inputData) public virtual {
-        bytes memory message = _validateAndExtractMessage(inputData);
-        _processMessageFromChild(message);
+    // function receiveMessage(bytes memory inputData) public virtual {
+    //     bytes memory message = _validateAndExtractMessage(inputData);
+    //     _processMessageFromChild(message);
+    // }
+
+    function receiveMessage(bytes[] memory inputData) public virtual {
+        for (uint64 i = 0; i < inputData.length; i++) {
+            bytes memory message = _validateAndExtractMessage(inputData[i]);
+            _processMessageFromChild(message);
+        }
     }
 
     /**

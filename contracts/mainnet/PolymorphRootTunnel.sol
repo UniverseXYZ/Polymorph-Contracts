@@ -17,53 +17,61 @@ contract PolymorphRootTunnel is FxBaseRootTunnel, PolymorphTunnel {
 
     PolymorphRoot public polymorphContract;
 
-    modifier onlyOwner(uint256 tokenId) {
-        require(
-            polymorphContract.ownerOf(tokenId) == msg.sender,
-            "Only owner can move polymorph"
-        );
-        _;
-    }
-
     function _processMessageFromChild(bytes memory data) internal override {
         require(
             address(polymorphContract) != address(0),
             "Polymorph contract hasn't been set yet"
         );
         (
-            uint256 tokenId,
+            uint256[] memory tokenIds,
             address ownerAddress,
-            uint256 gene,
-            bool isNotVirgin,
-            uint256 genomeChanges
-        ) = _decodeMessage(data);
+            uint256[] memory genes,
+            bool[] memory isNotVirgin,
+            uint256[] memory genomeChanges
+        ) = _decodeMessageFromChild(data);
 
-        polymorphContract.transferFrom(address(this), ownerAddress, tokenId);
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            polymorphContract.transferFrom(
+                address(this),
+                ownerAddress,
+                tokenIds[i]
+            );
 
-        polymorphContract.wormholeUpdateGene(
-            tokenId,
-            gene,
-            isNotVirgin,
-            genomeChanges
-        );
+            polymorphContract.wormholeUpdateGene(
+                tokenIds[i],
+                genes[i],
+                isNotVirgin[i],
+                genomeChanges[i]
+            );
+        }
     }
 
-    function moveThroughWormhole(uint256 tokenId)
-        public
-        override
-        onlyOwner(tokenId)
-    {
-        polymorphContract.transferFrom(msg.sender, address(this), tokenId);
-
-        _sendMessageToChild(
-            abi.encode(
-                tokenId,
-                msg.sender,
-                polymorphContract.geneOf(tokenId),
-                polymorphContract.isNotVirgin(tokenId),
-                polymorphContract.genomeChanges(tokenId)
-            )
+    function moveThroughWormhole(uint256[] calldata _tokenIds) public override {
+        require(
+            _tokenIds.length <= 20,
+            "Trying to bulk bridge more than 20 polymorphs"
         );
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            require(
+                polymorphContract.ownerOf(_tokenIds[i]) == msg.sender,
+                "Msg.sender should be the polymorph owner"
+            );
+            polymorphContract.transferFrom(
+                msg.sender,
+                address(this),
+                _tokenIds[i]
+            );
+
+            _sendMessageToChild(
+                abi.encode(
+                    _tokenIds[i],
+                    msg.sender,
+                    polymorphContract.geneOf(_tokenIds[i]),
+                    polymorphContract.isNotVirgin(_tokenIds[i]),
+                    polymorphContract.genomeChanges(_tokenIds[i])
+                )
+            );
+        }
     }
 
     function setPolymorphContract(address payable contractAddress)
