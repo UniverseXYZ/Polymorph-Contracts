@@ -186,17 +186,17 @@ abstract contract FxBaseRootTunnel {
      *  8 - branchMask - 32 bits denoting the path of receipt in merkle tree
      *  9 - receiptLogIndex - Log Index to read from the receipt
      */
-    // function receiveMessage(bytes memory inputData) public virtual {
-    //     bytes memory message = _validateAndExtractMessage(inputData);
-    //     _processMessageFromChild(message);
-    // }
-
-    function receiveMessage(bytes[] memory inputData) public virtual {
-        for (uint64 i = 0; i < inputData.length; i++) {
-            bytes memory message = _validateAndExtractMessage(inputData[i]);
-            _processMessageFromChild(message);
-        }
+    function receiveMessage(bytes memory inputData) public virtual {
+        bytes memory message = _validateAndExtractMessage(inputData);
+        _processMessageFromChild(message);
     }
+
+    // function receiveMessage(bytes[] memory inputData) public virtual {
+    //     for (uint64 i = 0; i < inputData.length; i++) {
+    //         bytes memory message = _validateAndExtractMessage(inputData[i]);
+    //         _processMessageFromChild(message);
+    //     }
+    // }
 
     /**
      * @notice Process message received from Child Tunnel

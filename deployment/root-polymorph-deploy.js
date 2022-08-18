@@ -20,14 +20,14 @@ async function PolymorphDeploy() {
     "https://us-central1-polymorphmetadata.cloudfunctions.net/images-function-test?id=";
   const DAOAddress = "0x7e94e8D8c85960DBDC67E080C3D48D4e0BD423a6";
   const royaltyFee = 0;
-  const geneChangePrice = ethers.utils.parseEther("0.01");
+  const geneChangePrice = ethers.utils.parseEther("0.001");
   const polymorphPrice = ethers.utils.parseEther("0.0777");
   const polymorphsLimit = 10000;
-  const randomizePrice = ethers.utils.parseEther("0.01");
+  const randomizePrice = ethers.utils.parseEther("0.001");
   const bulkBuyLimit = 20;
   const arweaveContainer =
     "https://arweave.net/5KDDRA5EE9p-Bw29ryB9Uz6SvMRNMCyXKkOzW_ZT9gA";
-  const polymorphV1Address = "0x20951C5a7Ad50B9b9bC9202b4E32c9Deb2fD7b51";
+  const polymorphV1Address = "0xfBF3471CB8e09967E41aBf56d66a3eC59BF371F7";
 
   const constructorArgs = {
     name: tokenName,

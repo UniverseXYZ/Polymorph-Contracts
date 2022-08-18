@@ -14,14 +14,14 @@ async function printDeployerInfo() {
 async function PolymorphDeploy() {
   await printDeployerInfo();
 
-  const tokenName = "Polymorph";
+  const tokenName = "PolymorphChild";
   const tokenSymbol = "iMORPH";
   const metadataURI =
-    "https://us-central1-polymorphmetadata.cloudfunctions.net/images-function?id=";
+    "https://us-central1-polymorphmetadata.cloudfunctions.net/images-function-test?id=";
   const DAOAddress = "0x7e94e8D8c85960DBDC67E080C3D48D4e0BD423a6";
-  const maticWETHAddress = "0x4Fb90bc32709d73A5E745B56708C84A6Ad7Ab5C9";
-  const geneChangePrice = ethers.utils.parseEther("0.01");
-  const randomizePrice = ethers.utils.parseEther("0.01");
+  const maticWETHAddress = "0xBEd0609af43a0cbAe586255e8e39c93398f54CDA";
+  const geneChangePrice = ethers.utils.parseEther("0.001");
+  const randomizePrice = ethers.utils.parseEther("0.001");
   const arweaveContainer =
     "https://arweave.net/5KDDRA5EE9p-Bw29ryB9Uz6SvMRNMCyXKkOzW_ZT9gA";
 
